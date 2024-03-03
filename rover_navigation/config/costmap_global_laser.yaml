@@ -1,0 +1,11 @@
+global_frame: odom
+rolling_window: true
+track_unknown_space: true
+
+plugins:
+        - {name: rgbd_obstacle_layer,     type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
+        - {name: inflation,                 type: "costmap_2d::InflationLayer"}
+
+rgbd_obstacle_layer:
+        rgbd1_mark:
+                obstacle_range: 10.0

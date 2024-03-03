@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="base_link_v0" params="parent *joint_origin">
+    <joint name="base_link_joint" type="fixed">
+      <xacro:insert_block name="joint_origin"/>
+      <parent link="${parent}"/>
+      <child link="base_link"/>
+    </joint>
+
+    <link name="base_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Final_SAR_temporary_copy_final/meshes/base_link.STL"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Final_SAR_temporary_copy_final/meshes/base_link.STL"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="-0.169915088395825 -0.00199596460135764 -0.00919692919066987"/>
+        <mass value="14.4435926271869"/>
+        <inertia ixx="0.0717912278135852" ixy="-7.70091070297908E-07" ixz="-6.88067299368864E-07" iyy="0.298762417937452" iyz="2.41721140540893E-08" izz="0.359670360949306"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+</robot>
