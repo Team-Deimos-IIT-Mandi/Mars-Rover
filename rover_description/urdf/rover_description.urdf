@@ -472,7 +472,7 @@
           xyz="0 0 1" />
       </joint>
 
-      <transmission name="wheel_1_trans">
+    <transmission name="wheel_1_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="wheel_1">
         <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
@@ -557,7 +557,7 @@
     </plugin>
   </gazebo>
 
-    <link name="camera_link">
+<link name="camera_link">
   <visual>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <geometry>
@@ -638,7 +638,7 @@
       <visualize>true</visualize>
       <topic>__default_topic__</topic>
       <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
-        <topicName>imu</topicName>
+        <topicName>/imu/data</topicName>
         <bodyName>imu_link</bodyName>
         <updateRateHZ>10.0</updateRateHZ>
         <gaussianNoise>0.0</gaussianNoise>

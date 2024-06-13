@@ -30,7 +30,7 @@
     
     # Base frame_id
     base_frame_id: base_link #default: base_link
-
+    enable_odom_tf: false
     # Velocity and acceleration limits
     # Whenever a min_* is unspecified, default to -max_*
     linear:
