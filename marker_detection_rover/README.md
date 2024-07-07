@@ -21,3 +21,8 @@ This ROS package was made for use in the [GTU Rover](https://youtu.be/uv-LEvk_AX
 
 ![Between Point Detection - Far](images/2.png)  
 **Between Point Detection** - You can see the position of the between point of the markers as a red dot. Information of the position is also published as ROS topic  
+
+
+## Demo Video
+
+Refer to this [video](https://youtu.be/ziW41AHA-24).
