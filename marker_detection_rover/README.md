@@ -39,6 +39,20 @@ Before you can launch and detect Aruco Markers in the Gazebo World, make sure to
    pip install opencv-contrib-python==4.2.0.32
     ```
 
+## Launching Aruco Detection
+
+Open your terminal and follow the below given instructions to launch Aruco  detection with our rover:
+
+1. Launch the "Rover_spawn_with_aruco_detection.launch" file:
+
+   ```bash
+     roslaunch rover_description Rover_spawn_with_aruco_detection.launch 
+    ```
+
+2. Rover is not spawning correctly, so manually rotate it and make sure that it is upright.
+
+3. Make sure the aruco Marker is visible in the "image Window" which will open after you launch the above file
+
 
 ## Demo Video
 
