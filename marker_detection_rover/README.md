@@ -21,3 +21,39 @@ This ROS package was made for use in the [GTU Rover](https://youtu.be/uv-LEvk_AX
 
 ![Between Point Detection - Far](images/2.png)  
 **Between Point Detection** - You can see the position of the between point of the markers as a red dot. Information of the position is also published as ROS topic  
+
+
+## Prerequisites
+
+Before you can launch and detect Aruco Markers in the Gazebo World, make sure to install the correct version of openCV in your system:
+
+1. Uninstall the current OpenCV package:
+
+   ```bash
+    pip uninstall opencv-python
+    ```
+
+2. Install the opencv-contrib-python package:
+
+    ```bash
+   pip install opencv-contrib-python==4.2.0.32
+    ```
+
+## Launching Aruco Detection
+
+Open your terminal and follow the below given instructions to launch Aruco  detection with our rover:
+
+1. Launch the "Rover_spawn_with_aruco_detection.launch" file:
+
+   ```bash
+     roslaunch rover_description Rover_spawn_with_aruco_detection.launch 
+    ```
+
+2. Rover is not spawning correctly, so manually rotate it and make sure that it is upright.
+
+3. Make sure the aruco Marker is visible in the "image Window" which will open after you launch the above file
+
+
+## Demo Video
+
+Refer to this [video](https://youtu.be/ziW41AHA-24).
