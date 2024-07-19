@@ -564,38 +564,6 @@
     </plugin>
   </gazebo>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- IMU implementation -->
 <link name="imu_link">
 </link>
@@ -627,11 +595,6 @@
   </gazebo>
 
 
-
-
-
-
-
   <!-- GPS implementation on rover -->
 
 <gazebo>
@@ -653,19 +616,6 @@
     <velocityGaussianNoise>0.5 0.5 0.5</velocityGaussianNoise>
 </plugin>
 </gazebo>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -734,14 +684,6 @@
     </plugin>
   </sensor>
 </gazebo> 
-
-  <!-- <xacro:include filename="$(find camera_xacro_rover)/urdf/camera.xacro"/> -->
-
-
-
-  <!-- <xacro:include filename="$(find camera_xacro_rover)/urdf/camera.xacro"/> -->
-
-
 
     </robot>
 

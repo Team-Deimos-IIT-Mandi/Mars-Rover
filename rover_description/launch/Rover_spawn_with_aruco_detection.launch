@@ -1,7 +1,4 @@
 <launch>
-  <!-- <include -->
-    <!-- file="$(find gazebo_ros)/launch/empty_world.launch" /> -->
-
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find gazebo_ros)/worlds/empty.world"/>
     <arg name="paused" value="false"/>
@@ -10,10 +7,6 @@
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>
-
-
-
-
 
  <!-- Set the arguments to be passed -->
     <arg name="x" default="3"/>
@@ -43,25 +36,6 @@
         <arg name="file_name" value="$(arg file_name)"/>
     </include>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   <node
     name="tf_footprint_base"
     pkg="tf"
@@ -79,30 +53,10 @@
     type="rostopic"
     args="pub /calibrated std_msgs/Bool true" />
   
-
-
-
-      <!-- Camera node -->
- <!-- <param name="camera_name" value="camera"/> -->
-
- 
- <!-- Start  Aruco detection node -->
-
- <!-- <node name="aruco_detector_cpp" pkg="marker_detection_rover" type="find_between_cpp" output="screen">
-        <param name="mode" value="P" />
-    </node> -->
-
-
  <node name="aruco_detector" pkg="marker_detection_rover" type="find_between.py" output="screen" />
-
-
-
 
     <!-- Launch RViz -->
  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" output="screen"/>
-
-
-
 
     <!-- Load URDF -->
   <param
