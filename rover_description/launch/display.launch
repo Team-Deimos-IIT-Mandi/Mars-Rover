@@ -7,7 +7,8 @@
   <node
     name="joint_state_publisher_gui"
     pkg="joint_state_publisher_gui"
-    type="joint_state_publisher_gui" />
+    type="joint_state_publisher_gui"
+    respawn="true" />
   <node
     name="robot_state_publisher"
     pkg="robot_state_publisher"
@@ -16,5 +17,5 @@
     name="rviz"
     pkg="rviz"
     type="rviz"
-    args="-d $(find rover_description)/urdf.rviz" />
+    args="-d $(find rover_description)/rviz/rviz_image.rviz" />
 </launch>

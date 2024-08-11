@@ -12,14 +12,15 @@
 
   <!-- convert joint states to TF transforms for rviz, etc -->
   <node name="robot_state_publisher" pkg="robot_state_publisher"
-		type="robot_state_publisher" respawn="false" output="screen">
+		type="robot_state_publisher" respawn="true" output="screen">
   </node>
 
   <arg name="enable_ekf" default="true"/>
 
   <group if="$(arg enable_ekf)" >
-    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_local">
       <rosparam command="load" file="$(find rover_control)/config/localization.yaml" />
+      <remap from="/odometry/filtered" to="/odometry/filtered/local"/>
     </node>
     <node pkg="robot_localization" type="navsat_transform_node" name="navsat_tranform">
       <remap from="/gps/fix" to="/gps/fix"/>

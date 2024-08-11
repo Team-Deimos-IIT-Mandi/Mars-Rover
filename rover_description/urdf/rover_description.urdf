@@ -3,8 +3,18 @@
         Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
         For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
     <robot name="mars_rover" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <link name = "base_link"/>
+    <link name = "base_footprint"/>
+
+    <joint name="base_footprint_tf" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="base_footprint"/>
+    </joint>
+
       <link
-        name="base_link">
+        name="chassis">
         <inertial>
           <origin
             xyz="-0.169915088395825 -0.00199596460135764 -0.00919692919066987"
@@ -43,6 +53,13 @@
           </geometry>
         </collision>
       </link>
+
+      <joint name="connector" type="fixed">
+        <origin xyz="0 0 0.4" rpy="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="chassis"/>
+      </joint>
+
       <link
         name="steering1">
         <inertial>
@@ -90,7 +107,7 @@
           xyz="-0.52941 0.29162 -0.12851"
           rpy="0 -1.8353E-05 0" />
         <parent
-          link="base_link" />
+          link="chassis" />
         <child
           link="steering1" />
         <axis
@@ -197,7 +214,7 @@
           xyz="-0.52941 -0.29588 -0.1285"
           rpy="0 0 0" />
         <parent
-          link="base_link" />
+          link="chassis" />
         <child
           link="steering2" />
         <axis
@@ -304,7 +321,7 @@
           xyz="0.32344 -0.29562 -0.1285"
           rpy="0 0 0" />
         <parent
-          link="base_link" />
+          link="chassis" />
         <child
           link="steeering3" />
         <axis
@@ -411,7 +428,7 @@
           xyz="0.32345 0.29186 -0.12849"
           rpy="0 -1.8353E-05 0" />
         <parent
-          link="base_link" />
+          link="chassis" />
         <child
           link="steering4" />
         <axis
@@ -573,7 +590,7 @@
 </link>
 
 <joint name="camera_joint" type="fixed">
-  <parent link="base_link"/>
+  <parent link="chassis"/>
   <child link="camera_link"/>
   <origin xyz="0.1 0 0.1" rpy="0 0 0"/> <!-- Adjust position as needed -->
 </joint>
@@ -626,7 +643,7 @@
 </link>
 <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 <joint name="imu_joint" type="fixed">
-<parent link="base_link"/>
+<parent link="chassis"/>
 <child link="imu_link"/>
 </joint>
 
