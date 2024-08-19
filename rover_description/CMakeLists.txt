@@ -11,6 +11,6 @@ if (CATKIN_ENABLE_TESTING)
 endif()
 
 install(
-  DIRECTORY launch meshes urdf config textures
+  DIRECTORY launch meshes urdf config rviz worlds 
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
