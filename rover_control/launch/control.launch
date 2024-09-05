@@ -2,7 +2,7 @@
 <launch>
 
   <!-- Load joint controller configurations from YAML file to parameter server -->
-  <rosparam file="$(find rover_control)/config/control.yaml" command="load"/>
+  <rosparam file="$(find rover_control)/config/control1.yaml" command="load"/>
 
   <!-- load the controllers -->
   <node name="controller_spawner" pkg="controller_manager"

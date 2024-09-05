@@ -1,0 +1,9 @@
+<library path="lib/libswerve_steering_controller">
+
+  <class name="swerve_steering_controller/SwerveSteeringController" type="swerve_steering_controller::SwerveSteeringController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The SwerveSteeringController tracks velocity commands. It expects n VelocityJointInterface type and n PositionJointInterface type of hardware interfaces.
+    </description>
+  </class>
+
+</library>
