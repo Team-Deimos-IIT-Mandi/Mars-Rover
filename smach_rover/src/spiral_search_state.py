@@ -7,7 +7,7 @@ import rospkg
 
 class SpiralSearch(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['completed', 'failed'])
+        smach.State.__init__(self, outcomes=['teleop', 'autonomous', 'shutdown', 'idle'])
         self.process = None  # Handle for the new terminal process
 
     def execute(self, userdata):
@@ -19,33 +19,45 @@ class SpiralSearch(smach.State):
             package_path = rospack.get_path('aruco_sim_rover')
             launch_file_path = os.path.join(package_path, 'launch', 'arucoSpawner.launch')
 
-            # Command to launch in a new terminal using xterm
-            command = f"xterm -e 'roslaunch {package_path} {launch_file_path}'"
-            
+            # Command to launch in a new terminal using gnome-terminal
+            command = f"gnome-terminal -- bash -c 'roslaunch {package_path} {launch_file_path}; exec bash'"
+
             # Start the launch file in a new terminal
             self.process = subprocess.Popen(command, shell=True)
             rospy.loginfo('Spiral search mode started in new terminal.')
 
-            # Simulate the spiral search task (replace with actual search logic)
-            while self.process.poll() is None:  # Check if the process is still running
-                rospy.sleep(1)  # Replace with actual spiral search logic if necessary
+            while not rospy.is_shutdown():
+                # Prompt user to type a command to switch state
+                rospy.loginfo("Spiral Search: Type 'teleop', 'autonomous', 'idle', or 'shutdown' to switch state:")
+                user_input = input().lower()
 
-            # Process completed successfully
-            if self.process.returncode == 0:
-                rospy.loginfo('Spiral search mode completed successfully.')
-                return 'completed'
-            else:
-                rospy.logerr('Spiral search mode failed.')
-                return 'failed'
+                if user_input == 'teleop':
+                    self.process.terminate()  # Terminate spiral search terminal
+                    rospy.loginfo('Switching to Teleoperation mode...')
+                    return 'teleop'
+
+                elif user_input == 'autonomous':
+                    self.process.terminate()  # Terminate spiral search terminal
+                    rospy.loginfo('Switching to Autonomous mode...')
+                    return 'autonomous'
+
+                elif user_input == 'idle':
+                    self.process.terminate()  # Terminate spiral search terminal
+                    rospy.loginfo('Switching to Idle mode...')
+                    return 'idle'
+
+                elif user_input == 'shutdown':
+                    self.process.terminate()  # Terminate spiral search terminal
+                    rospy.loginfo('Shutting down the rover...')
+                    return 'shutdown'
+
+                else:
+                    rospy.logwarn(f"Invalid input: {user_input}. Please type 'teleop', 'autonomous', 'idle', or 'shutdown'.")
+
+                rospy.sleep(1)
 
         except Exception as e:
-            rospy.logerr(f'Spiral search failed: {e}')
+            rospy.logerr(f'Spiral Search failed: {e}')
             if self.process:
-                self.process.terminate()
+                self.process.terminate()  # Ensure the subprocess is terminated if an error occurs
             return 'failed'
-
-    def terminate(self):
-        # Ensure the process is properly terminated when the state exits
-        if self.process:
-            self.process.terminate()
-            rospy.loginfo('Spiral search process terminated.')

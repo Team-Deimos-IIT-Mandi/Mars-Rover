@@ -7,7 +7,7 @@ import os
 
 class Autonomous(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['teleop', 'spiral_search', 'idle', 'failed'])
+        smach.State.__init__(self, outcomes=['teleop', 'spiral_search', 'idle', 'shutdown'])
         self.process = None  # To store the subprocess
 
     def execute(self, userdata):
@@ -44,9 +44,13 @@ class Autonomous(smach.State):
                     self.process.terminate()  # Terminate autonomous terminal
                     rospy.loginfo('Switching to Idle mode...')
                     return 'idle'
+
+                elif user_input == 'shutdown':
+                    rospy.loginfo('Shutting down the rover...')
+                    return 'shutdown'    
                 
                 else:
-                    rospy.logwarn(f"Invalid input: {user_input}. Please type 'teleop', 'spiral_search', or 'idle'.")
+                    rospy.logwarn(f"Invalid input: {user_input}. Please type 'teleop', 'spiral_search', 'shutdown' or 'idle'.")
 
                 rospy.sleep(1)  # Sleep to avoid constant logging and input checks
 

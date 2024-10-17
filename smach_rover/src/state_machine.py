@@ -63,7 +63,7 @@ def main():
                         transitions={
                             'spiral_search': 'SPIRAL_SEARCH',
                             'teleop': 'TELEOPERATION',
-                            'failed': 'IDLE',
+                            'shutdown': 'shutdown',
                             'idle': 'IDLE'
                         })
 
@@ -72,15 +72,17 @@ def main():
                        transitions={
                            'spiral_search': 'SPIRAL_SEARCH',
                            'autonomous': 'AUTONOMOUS_NAVIGATION',
-                           'failed': 'IDLE',
+                           'shutdown': 'shutdown',
                            'idle': 'IDLE'
                        })
 
         # Spiral search state
         smach.StateMachine.add('SPIRAL_SEARCH', SpiralSearch(),
                                transitions={
-                                   'completed': 'IDLE',
-                                   'failed': 'IDLE'
+                                'teleop': 'TELEOPERATION',
+                                'autonomous': 'AUTONOMOUS_NAVIGATION',
+                                'shutdown': 'shutdown',
+                                'idle': 'IDLE'
                                })
 
     try:
