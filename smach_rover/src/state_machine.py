@@ -13,7 +13,7 @@ def launch_gazebo_and_rviz():
     """Launch Gazebo and RViz in new terminals."""
     rospack = rospkg.RosPack()
     package_path = rospack.get_path('rover_description')
-    gazebo_launch_file = os.path.join(package_path, 'launch', 'gazebo.launch')
+    gazebo_launch_file = os.path.join(package_path, 'launch', 'main.launch')
     rviz_launch_file = os.path.join(package_path, 'launch', 'display.launch')  # Ensure you have a RViz launch file
 
     # Debug information
@@ -22,7 +22,7 @@ def launch_gazebo_and_rviz():
 
     try:
         # Launch Gazebo in a new terminal
-        subprocess.Popen(['gnome-terminal', '--', 'roslaunch', 'rover_description', 'gazebo.launch'])
+        subprocess.Popen(['gnome-terminal', '--', 'roslaunch', 'rover_description', 'main.launch'])
         rospy.loginfo("Gazebo launched successfully in a new terminal.")
 
         # Launch RViz in a new terminal

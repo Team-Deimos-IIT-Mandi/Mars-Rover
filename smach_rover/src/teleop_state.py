@@ -86,5 +86,3 @@ class Teleop(smach.State):
             rospy.logerr(f'Teleoperation failed: {e}')
             self.terminate_process()  # Ensure the subprocess is terminated if an error occurs
             return 'failed'
-
-  
