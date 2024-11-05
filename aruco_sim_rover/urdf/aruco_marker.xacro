@@ -3,7 +3,7 @@
 <robot name="aruco_marker" xmlns:xacro="http://www.ros.org/wiki/xacro">
 	<xacro:property name="robot_name" value="aruco_marker" />
 	<xacro:property name="pole_mass" value="0"/>
-	<xacro:property name="pole_height" value="1"/>
+	<xacro:property name="pole_height" value="0.6"/>
 	<xacro:property name="pole_radius" value=".015"/>
 	<xacro:property name="marker_mass" value=".240"/>
 	<xacro:arg name="model_file" default="arucoMarker0.dae"/>
@@ -56,7 +56,7 @@
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
-				<mesh filename="package://aruco_sim/meshes/$(arg model_file)"/>
+				<mesh filename="package://aruco_sim_rover/meshes/$(arg model_file)"/>
 			</geometry>
 		</visual>
 

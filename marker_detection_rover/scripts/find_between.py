@@ -16,6 +16,7 @@ matrix_coefficients = []
 betweenPose = PoseStamped()
 postPose = PoseStamped()
 mode = "P"
+found = False
 
 class TestNode:
     def __init__(self):
@@ -36,14 +37,17 @@ class image_converter:
     self.AR               = rospy.Publisher("AR",Bool,queue_size=1)
     self.between_pub      = rospy.Publisher("/move_base_simple/goal",PoseStamped,queue_size=1)
     self.bridge           = CvBridge()
-    self.calibrate_camera = rospy.Subscriber("/camera/color/camera_info",CameraInfo,self.callbackCalibrate)
+
     self.image_sub        = rospy.Subscriber("/camera/color/image_raw",Image,self.callback)
     
 
   def callback(self,data):
-    
-    global distortion_coefficients
-    global matrix_coefficients
+    matrix_coefficients = np.array([[1662.764073573561, 0, 960.5],
+              [0, 1662.764073573561, 540.5],
+              [0, 0, 1]])
+
+# Distortion Coefficients
+    distortion_coefficients = np.array([1e-08, 1e-08, 1e-08, 1e-08, 1e-08])
 
     try:
       cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
@@ -95,7 +99,8 @@ class image_converter:
           quaternion = tf.transformations.quaternion_from_matrix(rotation_matrix)
           
 
-          if mode == "P":  
+          if mode == "P" and found == False:  
+            print(found)
             self.publishPostPose(tvec[0][0][0],tvec[0][0][1],tvec[0][0][2],quaternion[0],quaternion[1],quaternion[2],quaternion[3])
 
           else:
@@ -107,6 +112,7 @@ class image_converter:
             orientationY = quaternion[1] + orientationY
             orientationZ = quaternion[2] + orientationZ
             orientationW = quaternion[3] + orientationW
+            self.AR.publish(False)
 
 
           # cv2.imshow("Image window", cv_image)
@@ -139,26 +145,40 @@ class image_converter:
 
   def publishPostPose(self,pX, pY,pZ, oX,oY,oZ, oW):
     global postPose
+    found = True
+    
     postPose = PoseStamped()
-    postPose.header.frame_id = "camera_realsense_link"
+    postPose.header.frame_id = "camera_link"
     postPose.pose.position.x = pZ 
     postPose.pose.position.y = pX 
     postPose.pose.position.z = 0
-
+   
     postPose.pose.orientation.x = 0
     postPose.pose.orientation.y = 0
     postPose.pose.orientation.z = oZ
     postPose.pose.orientation.w = oW 
             
-    self.between_pub.publish(postPose)
-    self.AR.publish(True)     
+    try:
+        listener = tf.TransformListener()
+        listener.waitForTransform('odom', 'camera_link', rospy.Time(0), rospy.Duration(1.0))
+        transformed_pose = listener.transformPose('odom', postPose)
+        print('\n')
+        print([transformed_pose.pose.position.x, transformed_pose.pose.position.y])
+        print('\n')
+        
+        # Now publish the transformed pose in the odom frame
+        self.between_pub.publish(transformed_pose)
+        self.AR.publish(True)
+    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
+        rospy.logerr("TF Exception: %s", e)  
+    
     # rospy.sleep(20) 
 
   def publishGatePose(self,corners, pX, pY,pZ, oX,oY,oZ, oW):
     if len(corners) > 1:
       global betweenPose
       betweenPose = PoseStamped()
-      betweenPose.header.frame_id = "camera_realsense_link"
+      betweenPose.header.frame_id = "camera_link"
       betweenPose.pose.position.x = pZ / 2
       betweenPose.pose.position.y = pX / 2
       betweenPose.pose.position.z = 0
@@ -168,6 +188,7 @@ class image_converter:
       betweenPose.pose.orientation.z = oZ / 2
       betweenPose.pose.orientation.w = oW / 2
       self.between_pub.publish(betweenPose)
+      print("yes")
       self.AR.publish(True)
       # rospy.sleep(20)
 
@@ -193,7 +214,10 @@ class image_converter:
           (topLeft[0], topLeft[1] - 15),
           cv2.FONT_HERSHEY_SIMPLEX,
           1, (0, 255, 0), 2) 
-    
+    cv2.namedWindow("Image window", cv2.WINDOW_NORMAL)
+
+# Resize the window to a smaller size (e.g., 300x300 pixels)
+    cv2.resizeWindow("Image window", 300, 300)
     cv2.imshow("Image window", cv_image)
     cv2.waitKey(3)
 
@@ -202,45 +226,12 @@ class image_converter:
     except CvBridgeError as e:
       print(e)
 
-  def callbackCalibrate(self,data):
-      global distortion_coefficients
-      global matrix_coefficients
-
-      distortion_coefficients = []
-      matrix_coefficients = []
-
-      distortion_coefficients.append(data.D[0])
-      distortion_coefficients.append(data.D[1])
-      distortion_coefficients.append(data.D[2])
-      distortion_coefficients.append(data.D[3])
-      distortion_coefficients.append(data.D[4])
-        
-      matrix_coefficients.append([])
-      matrix_coefficients[0].append(data.K[0])
-      matrix_coefficients[0].append(data.K[1])
-      matrix_coefficients[0].append(data.K[2])
-
-      matrix_coefficients.append([])
-      matrix_coefficients[1].append(data.K[3])
-      matrix_coefficients[1].append(data.K[4])
-      matrix_coefficients[1].append(data.K[5])
-
-      matrix_coefficients.append([])
-      matrix_coefficients[2].append(data.K[6])
-      matrix_coefficients[2].append(data.K[7])
-      matrix_coefficients[2].append(data.K[8])
-
-      distortion_coefficients = np.array(distortion_coefficients)
-      matrix_coefficients = np.array(matrix_coefficients)
-
-      self.unsubscribe()
-      
-  def unsubscribe(self):
-    self.calibrate_camera.unregister()
-
+  
 def main(args):
   global mode
   mode = "P"
+  global found
+  found = False
   if len(rospy.myargv()) > 1:
         mode = rospy.myargv()[1]
 
