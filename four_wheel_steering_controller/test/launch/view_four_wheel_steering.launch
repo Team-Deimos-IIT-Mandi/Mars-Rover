@@ -1,6 +1,7 @@
 <launch>
+   <rosparam param="use_sim_time">True</rosparam>
   <!-- Start gazebo world -->
-  <!--<include file="$(find gazebo_ros)/launch/empty_world.launch"/>-->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
   <!-- OR -->
   <!-- Start four_wheel_steering -->
   <node name="four_wheel_steering"
@@ -25,11 +26,9 @@
         pkg="controller_manager" type="spawner" output="screen"
         args="robot_joint_publisher four_wheel_steering_controller --shutdown-timeout 3"/>
 
-  <node pkg="joy" type="joy_node" name="joy_node">
-    <param name="dev" value="/dev/input/js0" />
-  </node>
-
-  <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy">
+ <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_kb" output="screen">
+    <param name="speed" value="0.5" />  <!-- Adjust speed if necessary -->
+    <param name="turn" value="1.0" />   <!-- Adjust turn rate if necessary -->
     <remap from="cmd_vel" to="/four_wheel_steering_controller/cmd_vel"/>
   </node>
 </launch>
