@@ -76,6 +76,7 @@ namespace swerve_steering_controller
           void starting(const ros::Time& time);
 
           void stopping(const ros::Time& time);
+          
 
       private:
           std::string name_;
@@ -127,6 +128,9 @@ namespace swerve_steering_controller
           realtime_tools::RealtimeBuffer<utils::command> commands_buffer_;
 
           std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::JointTrajectoryControllerState> > controller_state_pub_;
+          ros::Publisher desired_velo_pub;
+          ros::Publisher desired_pos_pub;
+          float desired_positions[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 
           void cmd_callback(const geometry_msgs::Twist& command);
 
@@ -141,6 +145,8 @@ namespace swerve_steering_controller
           void set_to_initial_state();
 
           void publishWheelData(const ros::Time& time, const ros::Duration& period, std::vector<double> wheels_desired_velocities, std::vector<double> holders_desired_positions);
+
+          
   
     };
 }// namespace swerve_steering_controller

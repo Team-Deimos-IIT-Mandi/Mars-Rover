@@ -38,6 +38,7 @@
 
 #include <swerve_steering_controller/swerve_steering_controller.h>
 #include <pluginlib/class_list_macros.hpp>
+#include "std_msgs/Float32MultiArray.h"
 
 namespace swerve_steering_controller
 {
@@ -104,7 +105,8 @@ namespace swerve_steering_controller
 	  controller_nh.param("angular/z/max_acceleration"       , limiter_ang_.max_acceleration       ,  limiter_ang_.max_acceleration      );
 	  controller_nh.param("angular/z/min_acceleration"       , limiter_ang_.min_acceleration       , -limiter_ang_.max_acceleration      );
 
-
+	  desired_velo_pub = controller_nh.advertise<std_msgs::Float32MultiArray>("desired_velocities",10);
+	  desired_pos_pub = controller_nh.advertise<std_msgs::Float32MultiArray>("desired_positions",10);
 	  // Wheel joint controller state:
 	  if (publish_wheel_joint_controller_state_)
 	  {
@@ -262,6 +264,10 @@ namespace swerve_steering_controller
 
 	  // Compute wheels velocities and set wheels velocities
 	  std::vector<double> desired_velocities,desired_positions;
+		std_msgs::Float32MultiArray pos;
+		std_msgs::Float32MultiArray velo;
+		pos.data.resize(wheel_joints_size_);
+		velo.data.resize(wheel_joints_size_);
 
 	  for (size_t i = 0; i < wheel_joints_size_; ++i)
 	  {
@@ -283,6 +289,10 @@ namespace swerve_steering_controller
 		  //get the actual w,th to be applied on the wheels.
 		  double w_applied  = wheels_[i].get_command_velocity();
 		  double th_applied = wheels_[i].get_command_angle();
+		  velo.data[i] = w_applied;
+		  pos.data[i] = th_applied + w_applied*cmd_dt; 
+	
+
 		  
 		  if (publish_wheel_joint_controller_state_)
 		  {
@@ -292,9 +302,11 @@ namespace swerve_steering_controller
 
 		  wheels_joints_handles_[i].setCommand(w_applied);
 		  holders_joints_handles_[i].setCommand(th_applied);
+
 	  }
 
-	  
+	  desired_velo_pub.publish(velo);
+	  desired_pos_pub.publish(pos);
 	  publishWheelData(time, period,desired_velocities,desired_positions);
 
 	  time_previous_ = time;
@@ -678,9 +690,12 @@ namespace swerve_steering_controller
 
   void SwerveSteeringController::publishWheelData(const ros::Time& time, const ros::Duration& period, std::vector<double> wheels_desired_velocities, std::vector<double> holders_desired_positions)
   {
+	const double cmd_dt(period.toSec());
+	
+
 	if (publish_wheel_joint_controller_state_ && controller_state_pub_->trylock())
 	{
-	  const double cmd_dt(period.toSec());
+	  
 
 	  // Compute desired wheels velocities, that is before applying limits:
 	  controller_state_pub_->msg_.header.stamp = time;

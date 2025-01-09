@@ -4,6 +4,9 @@
   <!-- Load joint controller configurations from YAML file to parameter server -->
   <rosparam file="$(find rover_control)/config/control_swerve.yaml" command="load"/>
 
+  <node name="custom_hw" pkg="swerve_steering_controller" type="custom_hw" output="screen">
+  </node>
+
   <!-- load the controllers -->
   <node name="controller_spawner" pkg="controller_manager"
 		type="spawner" output="screen" 

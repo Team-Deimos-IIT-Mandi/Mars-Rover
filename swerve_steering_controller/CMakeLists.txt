@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
     controller_interface
     control_msgs
     geometry_msgs
+    controller_manager
     hardware_interface
     nav_msgs
     pluginlib
@@ -50,6 +51,7 @@ include_directories(
 
 add_library(${PROJECT_NAME}
  src/utils.cpp
+ src/swerve_custom.cpp
  src/swerve_steering_controller.cpp
  src/wheel.cpp
  src/interval.cpp
@@ -118,3 +120,5 @@ endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+add_executable(custom_hw src/swerve_custom.cpp)
+target_link_libraries(custom_hw ${catkin_LIBRARIES})
