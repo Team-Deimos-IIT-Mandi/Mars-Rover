@@ -14,8 +14,8 @@ class ObjectDetector:
         self.image_pub = rospy.Publisher("object_detection/image", Image, queue_size=10)
         self.object_pub = rospy.Publisher("object_detection/pose", PoseStamped, queue_size=10)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/realsense/color/image_raw", Image, self.image_callback)
-        self.camera_info_sub = rospy.Subscriber("/realsense/color/camera_info", CameraInfo, self.camera_info_callback)
+        self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
+        self.camera_info_sub = rospy.Subscriber("/camera/color/camera_info", CameraInfo, self.camera_info_callback)
         self.distortion_coefficients = None
         self.matrix_coefficients = None
 
