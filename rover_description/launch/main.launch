@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find rover_description)/worlds/terrain.world"/>
+    <arg name="world_name" value="$(find gazebo_ros)/launch/empty_world.launch"/>
     <!-- change the world file based on the world you want to work with-->
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
@@ -8,6 +8,17 @@
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>
+    <node pkg="marker_detection_rover" type="find_between.py" name="find_between" output="screen">
+        
+    </node>
+    <node pkg="marker_detection_rover" type="find_between_1.py" name="find_between_1" output="screen">
+
+    </node>
+
+    <node pkg="marker_detection_rover" type="find_between_2.py" name="find_between_2" output="screen">
+      
+    </node>
+    
   <node
     name="spawn_model"
     pkg="gazebo_ros"
@@ -23,8 +34,7 @@
     <!-- Load URDF -->
   <param
     name="robot_description"
-    textfile="$(find rover_description)/urdf/rover_description.urdf" />
-
+    textfile="$(find rover_description)/urdf/rover_description.urdf"/>
   <include file="$(find rover_control)/launch/control.launch"/>
   <include file="$(find rover_control)/launch/teleop.launch"/>
   <include file="$(find aruco_sim_rover)/launch/arucoSpawner.launch"/>

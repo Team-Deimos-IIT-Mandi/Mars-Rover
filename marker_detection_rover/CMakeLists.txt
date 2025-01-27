@@ -167,6 +167,8 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
  catkin_install_python(PROGRAMS
    scripts/find_between.py
+   scripts/find_between_1.py
+   scripts/find_between_2.py
    scripts/spiral_search.py
    scripts/object_detect.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

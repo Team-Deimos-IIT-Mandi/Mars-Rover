@@ -13,6 +13,7 @@ class ObjectDetector:
     def __init__(self):
         self.image_pub = rospy.Publisher("object_detection/image", Image, queue_size=10)
         self.object_pub = rospy.Publisher("object_detection/pose", PoseStamped, queue_size=10)
+         self.AR               = rospy.Publisher("AR",Bool,queue_size=1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
         self.camera_info_sub = rospy.Subscriber("/camera/color/camera_info", CameraInfo, self.camera_info_callback)
@@ -45,7 +46,7 @@ class ObjectDetector:
             print(e)
 
     def detect_objects(self, cv_image):
-        # Load pre-trained MobileNet SSD model
+        # Load pre-trained MobileNet SSD model 
         model_path = "MobileNetSSD_deploy.caffemodel"
         prototxt_path = "MobileNetSSD_deploy.prototxt.txt"
         net = cv2.dnn.readNetFromCaffe(prototxt_path, model_path)
@@ -62,7 +63,7 @@ class ObjectDetector:
         detections = net.forward()
 
         detected_objects = []
-
+          
         # Loop over the detections
         for i in range(detections.shape[2]):
             confidence = detections[0, 0, i, 2]
@@ -84,20 +85,34 @@ class ObjectDetector:
 
                     # Create PoseStamped message for the detected object
                     obj_pose = PoseStamped()
-                    obj_pose.header.frame_id = "camera_realsense_link"  # Adjust frame ID according to your setup
+                    obj_pose.header.frame_id = "camera_link"  # Adjust frame ID according to your setup
                     obj_pose.pose.position.x = obj_x
                     obj_pose.pose.position.y = obj_y
                     obj_pose.pose.position.z = obj_z
                     obj_pose.pose.orientation.w = 1.0  # Assuming no rotation
-
+                    try:
+                        listener = tf.TransformListener()
+                        listener.waitForTransform('odom', 'camera_link', rospy.Time(0), rospy.Duration(1.0))
+                        transformed_pose = listener.transformPose('odom', obj_pose)
+                        print('\n')
+                        print([transformed_pose.pose.position.x, transformed_pose.pose.position.y])
+                        print('\n')
+                        
+                        # Now publish the transformed pose in the odom frame
+                        detected_objects.append(transformed_pose)
+                        
+                    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
+                        rospy.logerr("TF Exception: %s", e)
                     # Append the detected object pose to the list
-                    detected_objects.append(obj_pose)
+                    
 
         return detected_objects
 
     def publish_object(self, obj_pose):
         # Publish the pose of a detected object
         self.object_pub.publish(obj_pose)
+        
+        self.AR.publish(True)
 
     def annotate_image(self, cv_image, detected_objects):
         # Annotate the image with bounding boxes or other visual indicators for detected objects
@@ -118,7 +133,7 @@ def main(args):
         rospy.spin()
     except KeyboardInterrupt:
         print("Shutting down")
-    cv2.destroyAllWindows()
+    cv2.destroyAllWindows()  
 
 if __name__ == '__main__':
     main(sys.argv)

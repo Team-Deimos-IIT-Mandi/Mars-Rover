@@ -37,14 +37,19 @@ class image_converter:
     self.AR               = rospy.Publisher("AR",Bool,queue_size=1)
     self.between_pub      = rospy.Publisher("/move_base_simple/goal",PoseStamped,queue_size=1)
     self.bridge           = CvBridge()
-
+    self.AR_ = rospy.Subscriber('/AR', Bool, self.ar_callback)
     self.image_sub        = rospy.Subscriber("/camera/color/image_raw",Image,self.callback)
-    
+    self.ar_active=False
+  def ar_callback(self, msg):
+  
+   self.ar_active = msg.data  # Update the status of AR 
 
   def callback(self,data):
     matrix_coefficients = np.array([[1662.764073573561, 0, 960.5],
               [0, 1662.764073573561, 540.5],
               [0, 0, 1]])
+
+          
 
 # Distortion Coefficients
     distortion_coefficients = np.array([1e-08, 1e-08, 1e-08, 1e-08, 1e-08])
@@ -99,7 +104,7 @@ class image_converter:
           quaternion = tf.transformations.quaternion_from_matrix(rotation_matrix)
           
 
-          if mode == "P" and found == False:  
+          if mode == "P" and self.ar_active!=True:  
             print(found)
             self.publishPostPose(tvec[0][0][0],tvec[0][0][1],tvec[0][0][2],quaternion[0],quaternion[1],quaternion[2],quaternion[3])
 
