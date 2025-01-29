@@ -8,7 +8,7 @@
   <!-- Viso2 -->
   <node pkg="viso2_ros" type="mono_odometer" name="mono_odometer">
     <remap from="image" to="/camera/color/image_raw"/>
-    <param name="base_link_frame_id" value="/base_link"/>
+    <param name="base_link_frame_id" value="base_link"/>
 
     <param name="camera_height" value="1.00" />
     <param name="camera_pitch"  value="0.00" />

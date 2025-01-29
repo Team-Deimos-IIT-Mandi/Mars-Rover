@@ -9,7 +9,7 @@ predict_to_current_time: true
 
 frequency: 30
 
-odom0: /mars_rover/odom
+odom0: /mono_odometer/odometry
 odom0_config: [false, false, false,
                false, false, false,
                true, true, true,
