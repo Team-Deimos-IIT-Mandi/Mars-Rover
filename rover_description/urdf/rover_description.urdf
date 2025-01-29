@@ -652,9 +652,10 @@
 
 <!-- Camera plugin -->
 <gazebo reference="camera_link_1">
-  <sensor name="camera1" type="camera">
-    <update_rate>100</update_rate>
-    <camera>
+  <sensor type="camera" name="camera1">
+    <visualize>true</visualize>
+    <update_rate>30.0</update_rate>
+    <camera name="camera_ir_1">
       <horizontal_fov>1.047198</horizontal_fov>
       <image>
         <width>640</width>
@@ -679,14 +680,14 @@
         <distortionK3>0.0</distortionK3>
         <distortionT1>0.0</distortionT1>
         <distortionT2>0.0</distortionT2>
-        </plugin>
-
+    </plugin>
   </sensor>
 </gazebo>
 <gazebo reference="camera_link_2">
-  <sensor name="camera2" type="camera">
-    <update_rate>100</update_rate>
-    <camera>
+  <sensor type="camera" name="camera2">
+    <visualize>true</visualize>
+    <update_rate>30.0</update_rate>
+    <camera name="camera_ir_2">
       <horizontal_fov>1.047198</horizontal_fov>
       <image>
         <width>640</width>
@@ -700,7 +701,7 @@
     </camera>
     <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
         <alwaysOn>true</alwaysOn>
-        <updateRate>100</updateRate>
+        <updateRate>0.0</updateRate>
         <cameraName>camera_ir_2</cameraName>
         <imageTopicName>/camera2/color/image_raw</imageTopicName>
         <cameraInfoTopicName>/camera2/color/camera_info</cameraInfoTopicName>
@@ -715,9 +716,10 @@
   </sensor>
 </gazebo>
 <gazebo reference="camera_link">
-  <sensor name="kinect_camera" type="depth">
-    <update_rate>100</update_rate>
-    <camera>
+  <sensor type="depth" name="kinect_camera">
+    <visualize>true</visualize>
+    <update_rate>30.0</update_rate>
+    <camera name="camera_ir">
       <horizontal_fov>1.047198</horizontal_fov>
       <image>
         <width>640</width>
@@ -790,24 +792,21 @@
 
   <!-- GPS implementation on rover -->
 
-<gazebo>
-  <plugin name="gazebo_ros_gps" filename="libhector_gazebo_ros_gps.so">
-    <robotNamespace>mars_rover</robotNamespace>
-    <updateRate>40.0</updateRate>
-    <bodyName>base_link</bodyName>
-    <frameId>base_link</frameId>
-    <topicName>/gps/fix</topicName>
-    <velocityTopicName>/gps/vel</velocityTopicName>
-    <referenceLatitude>31.7754</referenceLatitude>
-    <referenceLongitude>76.9861</referenceLongitude>
-    <referenceHeading>20</referenceHeading>
-    <referenceAltitude>10</referenceAltitude>
-    <offset>0 0 0</offset>
-    <drift>0 0 0</drift>
-    <gaussianNoise>0.05 0.05 0.05</gaussianNoise>
-    <velocityDrift>0.0001 0.0001 0.0001</velocityDrift>
-    <velocityGaussianNoise>0.5 0.5 0.5</velocityGaussianNoise>
-</plugin>
-</gazebo>
+  <!-- Gazebo plugin for the GPS sensor -->
+  <gazebo>
+    <plugin name="gps_controller" filename="libhector_gazebo_ros_gps.so">
+      <robotNamespace>/</robotNamespace>
+      <updateRate>40</updateRate>
+      <bodyName>base_link</bodyName>
+      <frameId>base_link</frameId>
+      <topicName>gps/fix</topicName>
+      <velocityTopicName>gps/vel</velocityTopicName>
+      <referenceLatitude>$(optenv GAZEBO_WORLD_LAT 49.9)</referenceLatitude>
+      <referenceLongitude>$(optenv GAZEBO_WORLD_LON 8.9)</referenceLongitude>
+      <referenceHeading>90</referenceHeading>
+      <referenceAltitude>0</referenceAltitude>
+      <drift>0.0001 0.0001 0.0001</drift>
+    </plugin>
+  </gazebo>
 
-    </robot>
+</robot>

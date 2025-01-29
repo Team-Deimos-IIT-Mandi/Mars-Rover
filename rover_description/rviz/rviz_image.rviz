@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /TF1/Frames1
+        - /Path3
       Splitter Ratio: 0.5
     Tree Height: 351
   - Class: rviz/Selection
@@ -87,7 +88,25 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        camera_link_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        camera_link_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         camera_optical_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_optical_link_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_optical_link_2:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -159,7 +178,15 @@ Visualization Manager:
           Value: true
         camera_link:
           Value: true
+        camera_link_1:
+          Value: true
+        camera_link_2:
+          Value: true
         camera_optical_link:
+          Value: true
+        camera_optical_link_1:
+          Value: true
+        camera_optical_link_2:
           Value: true
         chassis:
           Value: true
@@ -202,6 +229,12 @@ Visualization Manager:
               chassis:
                 camera_link:
                   camera_optical_link:
+                    {}
+                camera_link_1:
+                  camera_optical_link_1:
+                    {}
+                camera_link_2:
+                  camera_optical_link_2:
                     {}
                 imu_link:
                   {}
@@ -292,8 +325,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: -9999
-        Min Value: 9999
+        Max Value: 1.649999976158142
+        Min Value: 0.5
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -320,8 +353,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: -9999
-        Min Value: 9999
+        Max Value: 1.5
+        Min Value: 0.5
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -344,6 +377,30 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 29; 59; 255
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /move_base/NavfnROS/plan
+      Unreliable: false
       Value: true
   Enabled: true
   Global Options:
@@ -373,7 +430,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 8.59829330444336
+      Distance: 7.037176132202148
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -389,9 +446,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6053983569145203
+      Pitch: 0.6253983378410339
       Target Frame: <Fixed Frame>
-      Yaw: 1.5703988075256348
+      Yaw: 1.040399193763733
     Saved: ~
 Window Geometry:
   Displays:
@@ -411,5 +468,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1214
-  X: 251
-  Y: 24
+  X: 219
+  Y: -8
