@@ -11,7 +11,8 @@
     <param name="base_link_frame_id" value="base_link"/>
     <param name="publish_tf" value="false"/>
     
-    <param name="camera_height" value="1.00" />
+    <param name="max_features" value="20" />
+    <param name="camera_height" value="0.50" />
     <param name="camera_pitch"  value="0.00" />
   </node>
 
