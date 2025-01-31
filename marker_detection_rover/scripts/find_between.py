@@ -242,7 +242,7 @@ def main(args):
 
   rospy.init_node('image_converter', anonymous=True)
 
-  test_node = TestNode()
+  # test_node = TestNode()
   ic = image_converter()
   try:
     rospy.spin()
