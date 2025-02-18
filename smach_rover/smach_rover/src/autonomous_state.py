@@ -1,75 +1,93 @@
 #!/usr/bin/env python3
 import rospy
 import smach
-import subprocess 
+import subprocess
 import rospkg
 import os
-import signal
+from std_msgs.msg import String
+
 
 class Autonomous(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['teleop', 'spiral_search', 'idle', 'shutdown'])
-        self.process = None  # To store the subprocess
+        self.process = None  
+        self.current_state = "autonomous"  # Set default state
+        rospy.Subscriber('/smach_state', String, self.callback)
 
+    def callback(self, data):
+        """ Callback function to update state based on /smach_state topic """
+        new_state = data.data.strip().lower()
+
+        if new_state in ['teleop', 'spiral_search', 'idle', 'shutdown']:
+            rospy.loginfo(f"Received new state: {new_state}")
+            self.current_state = new_state  # Immediately store new state
+        else:
+            rospy.logwarn(f"Invalid state received: {new_state}")
 
     def execute(self, userdata):
-        rospy.loginfo('Launching autonomous navigation mode in a new terminal...')
+        rospy.loginfo('Launching Autonomous Navigation mode in a new terminal...')
 
         try:
-            # Get path to the move_base_mapless_demo.launch file in rover_navigation package
-            rospack = rospkg.RosPack()
-            package_path = rospack.get_path('rover_navigation')
-            launch_file_path = os.path.join(package_path, 'launch', 'move_base_mapless_demo.launch')
+            if self.process is None:
+                rospack = rospkg.RosPack()
+                package_path = rospack.get_path('rover_navigation')
+                launch_file_path = os.path.join(package_path, 'launch', 'move_base_mapless_demo.launch')
 
-            # Launch the autonomous navigation task in a new terminal
-            command = f"gnome-terminal -- bash -c 'roslaunch {package_path}/launch/move_base_mapless_demo.launch; exec bash'"
-            self.process = subprocess.Popen(command, shell=True)
-            rospy.loginfo('Autonomous navigation mode started in a new terminal.')
+                command = f"gnome-terminal -- bash -c 'roslaunch {launch_file_path}; exec bash'"
+                self.process = subprocess.Popen(command, shell=True)
+                rospy.loginfo('Autonomous Navigation started.')
 
-            # Stay in autonomous state until the user types a valid command for switching state
             while not rospy.is_shutdown():
-                # Prompt user to type a command to switch state
-                rospy.loginfo("Autonomous: Type 'teleop', 'spiral_search', 'shutdown' or 'idle' to switch state:")
-                user_input = input().lower()
-                try : 
-                   if user_input == 'teleop':
-                       rospy.loginfo('Switching to Teleoperation mode...')
-                       return 'teleop'
-                
-                   elif user_input == 'spiral_search':
-                       rospy.loginfo('Switching to Spiral Search mode...')
-                       return 'spiral_search'
-                
-                   elif user_input == 'idle':
-                       rospy.loginfo('Switching to Idle mode...')
-                       return 'idle'
+                if self.current_state != "autonomous":  # Check if state changed
+                    rospy.loginfo(f"Transitioning to state: {self.current_state}")
+                    if self.current_state == 'teleop':
+                        return 'teleop'
+                    elif self.current_state == 'spiral_search':
+                        return 'spiral_search'
+                    elif self.current_state == 'idle':
+                        return 'idle'
+                    elif self.current_state == 'shutdown':
+                        self.terminate_process()  # Ensure process is terminated
+                        return 'shutdown'
+                    else :
+                        rospy.logwarn(f"Invalid input : {self.current_state}")    
+                        return 'idle'
 
-                   elif user_input == 'shutdown':
-                       rospy.loginfo('Shutting down the rover...')
-                       rospy.sleep(6.0)
-                       result = subprocess.run(
-                              ["pgrep", "-f", "gnome-terminal"], 
-                              stdout=subprocess.PIPE , 
-                              text=True
-                                )
-                      # Get the list of process IDs
-                       pids = result.stdout.strip().split("\n")
-                      # Kill each process
-                       for pid in pids:
-                         subprocess.run(["kill", "-9", pid]) 
-                
-                   else:
-                        rospy.logwarn(f"Invalid input: {user_input}. Please type 'teleop', 'spiral_search', 'shutdown' or 'idle'.")
-
-                except EOFError as e:
-                    rospy.logerr(f"Error while getting user input: {e}")
-                    self.terminate_process()  # Ensure the process is terminated on failure
-                    return 'failed'
-
-                rospy.sleep(1)  # Sleep to avoid constant logging and input checks
+                rospy.sleep(2.0)  # Prevent high CPU usage
 
         except Exception as e:
             rospy.logerr(f'Autonomous navigation failed: {e}')
-            if self.process:
-                self.process.terminate()  # Ensure the subprocess is terminated if an error occurs
-            return 'failed'
+            self.terminate_process()  # Ensure process is cleaned up on error
+            return 'idle'  # Return a valid fallback state
+
+        rospy.logwarn("Unexpected loop exit! Defaulting to 'idle'.")
+        return 'idle'  # Ensure a valid outcome is always returned
+
+    def terminate_process(self):
+        """Terminates the subprocess running the launch file."""
+        if self.process:
+            rospy.loginfo("Terminating Autonomous Navigation...")
+            self.process.terminate()
+            rospy.sleep(3)  # Allow process to terminate
+            
+            result = subprocess.run(["pgrep", "-f", "gnome-terminal"], stdout=subprocess.PIPE, text=True)
+            pids = result.stdout.strip().split("\n")
+
+            for pid in pids:
+                if pid:
+                    subprocess.run(["kill", "-9", pid])
+                    rospy.loginfo(f"Killed process {pid}")
+
+
+if __name__ == "__main__":
+    rospy.init_node('autonomous_state')
+    sm = smach.StateMachine(outcomes=['success', 'failure'])
+    
+    with sm:
+        smach.StateMachine.add('AUTONOMOUS', Autonomous(), 
+                               transitions={'teleop': 'success', 
+                                            'spiral_search': 'success', 
+                                            'idle': 'success',
+                                            'shutdown': 'failure'})
+
+    outcome = sm.execute()

@@ -2,54 +2,73 @@
 import rospy
 import smach
 import subprocess
+from std_msgs.msg import String
 import os
-import signal
 
 class Idle(smach.State):
     def __init__(self):
         smach.State.__init__(self, 
                              outcomes=['teleop', 'autonomous', 'spiral_search', 'shutdown'])
-        self.process = None  # Make sure self.process is initialized
+        self.process = None
+        self.current_state = "idle"  # Set default state
+        rospy.Subscriber('/smach_state', String, self.callback)
 
+    def callback(self, data):
+        """ Callback function to handle state changes from /smach_state topic """
+        new_state = data.data.strip().lower()
+
+        if new_state in ['teleop', 'autonomous', 'spiral_search', 'shutdown']:
+            rospy.loginfo(f"Received new state: {new_state}")
+            self.current_state = new_state  # Immediately store new state
+        else:
+            rospy.logwarn(f"Invalid state received: {new_state}")
 
     def execute(self, userdata):
-        rospy.loginfo('Rover is in idle mode, ready for new commands')
+        rospy.loginfo('Rover is in IDLE mode. Waiting for state transitions...')
 
         while not rospy.is_shutdown():
-            # Prompt user to type a command to switch state
-            rospy.loginfo("Type 'teleop', 'spiral_search', 'autonomous', or 'shutdown' to switch state:")
-            user_input = input().lower()  # Blocking call (could be replaced with asynchronous method)
+            if self.current_state != "idle":  # Check if state changed
+                        rospy.loginfo(f"Transitioning to state: {self.current_state}")
+                        if self.current_state == 'autonomous':
+                            return 'autonomous'
+                        elif self.current_state == 'teleop':
+                            return 'teleop'
+                        elif self.current_state == 'spiral_search':
+                            return 'spiral_search'
+                        elif self.current_state == 'shutdown':
+                            return 'shutdown'
+                            self.terminate_process()
+                        else :    
+                            rospy.logwarn(f"Invalid input: {self.received_state}.")
 
-            if user_input == 'teleop':
-                rospy.loginfo('Switching to Teleoperation mode...')
-                return 'teleop'
+            rospy.sleep(2.0)
 
-            elif user_input == 'spiral_search':
-                rospy.loginfo('Switching to Spiral Search mode...')
-                return 'spiral_search'  # Return correct outcome 'spiral', not 'spiral_search'
+    def terminate_process(self):
+        """Kills all gnome-terminal processes."""
+        try:
+            result = subprocess.run(
+                ["pgrep", "-f", "gnome-terminal"], stdout=subprocess.PIPE, text=True
+            )
+            pids = result.stdout.strip().split("\n")
 
-            elif user_input == 'autonomous':
-                rospy.loginfo('Switching to Autonomous mode...')
-                return 'autonomous'
+            for pid in pids:
+                if pid:  # Ensure valid PID
+                    subprocess.run(["kill", "-9", pid])
+                    rospy.loginfo(f"Killed process {pid}")
 
-            elif user_input == 'shutdown':
-                 rospy.loginfo('Shutting down the rover...')
-                 rospy.sleep(6.0)
-                 result = subprocess.run(
-                              ["pgrep", "-f", "gnome-terminal"], 
-                              stdout=subprocess.PIPE , 
-                              text=True
-                                )
-                 # Get the list of process IDs
-                 pids = result.stdout.strip().split("\n")
-                 # Kill each process
-                 for pid in pids:
-                    subprocess.run(["kill", "-9", pid])    
+        except Exception as e:
+            rospy.logwarn(f"Error killing processes: {e}")
 
-            else:
-                rospy.logwarn(f"Invalid input: {user_input}. Please type 'teleop', 'spiral_search', 'autonomous', or 'shutdown'.")
 
-            rospy.sleep(1)  # Sleep to avoid constant logging and input checks
+if __name__ == "__main__":
+    rospy.init_node('idle')
+    sm = smach.StateMachine(outcomes=['success', 'failure'])
+    
+    with sm:
+        smach.StateMachine.add('IDLE', Idle(), 
+                               transitions={'autonomous': 'success', 
+                                            'teleop': 'success', 
+                                            'spiral_search': 'success',
+                                            'shutdown': 'failure'})
 
-        # If ROS is shutting down, return shutdown outcome
-        return 'shutdown'
+    outcome = sm.execute()            
