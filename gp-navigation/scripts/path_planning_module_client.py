@@ -27,8 +27,8 @@ class RobotOdometryData:
     self.position = None
     self.orientation = None
     self.yaw = None
-    self.robot_odom_sub = rospy.Subscriber('/ground_truth/state', Odometry, self.robot_odom_sub)
-    rospy.wait_for_message('/ground_truth/state', Odometry)
+    self.robot_odom_sub = rospy.Subscriber('/odometry/filtered/local', Odometry, self.robot_odom_sub)
+    rospy.wait_for_message('/odometry/filtered/local', Odometry)
 
   def robot_odom_sub(self, odom):
     self.position = odom.pose.pose.position 
@@ -657,7 +657,7 @@ class PathPlanningModuleClient:
 
           self.path_planning_client.send_goal(req)
 
-          self.distance_to_local = rospy.Subscriber('ground_truth/state', Odometry, self.distance_to_current_goal)
+          self.distance_to_local = rospy.Subscriber('/odometry/filtered/local', Odometry, self.distance_to_current_goal)
           while not self.complete:
             pass
           self.complete = False

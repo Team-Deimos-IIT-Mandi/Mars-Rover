@@ -52,6 +52,6 @@ if __name__ == '__main__':
 
     velodyne_pub = rospy.Publisher('velodyne_horizontal_points', PointCloud2, queue_size=10)
 
-    rospy.Subscriber("mid/points", PointCloud2, pointcloud_callback)
+    rospy.Subscriber("/camera/depth/points", PointCloud2, pointcloud_callback)
 
     rospy.spin()
