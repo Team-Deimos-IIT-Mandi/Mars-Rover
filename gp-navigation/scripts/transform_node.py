@@ -10,7 +10,7 @@ from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 
 def pointcloud_callback(data):
     try:
-        trans = tf_buffer.lookup_transform('world', 'velodyne', rospy.Time(0), rospy.Duration(1.0))
+        trans = tf_buffer.lookup_transform('map', 'camera_optical_link', rospy.Time(0), rospy.Duration(1.0))
         q = [
             trans.transform.rotation.x,
             trans.transform.rotation.y,
@@ -25,12 +25,12 @@ def pointcloud_callback(data):
 
         counter_trans = TransformStamped()
         counter_trans.header.stamp = rospy.Time.now()
-        counter_trans.header.frame_id = 'velodyne'
+        counter_trans.header.frame_id = 'camera_optical_link'
         counter_trans.child_frame_id = 'velodyne_horizontal'
         counter_trans.transform.rotation = Quaternion(*counter_rotation)
 
         broadcaster.sendTransform(counter_trans)
-        trans1 = tf_buffer.lookup_transform('velodyne_horizontal', 'velodyne', rospy.Time(0), rospy.Duration(1.0))
+        trans1 = tf_buffer.lookup_transform('velodyne_horizontal', 'camera_optical_link', rospy.Time(0), rospy.Duration(1.0))
 
         cloud_out = do_transform_cloud(data, trans1)
 

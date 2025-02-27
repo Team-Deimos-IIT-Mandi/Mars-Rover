@@ -14,12 +14,12 @@
     </node>
     <node name="path_planning_module_server" pkg="gp_navigation" type="path_planning_module_server.py" output="screen"/>
 
-    <!-- Differential Drive Controller -->
+    <!-- Differential Drive Controller
     <node name="diff_drive_go_to_goal" pkg="diff_drive" type="diff_drive_go_to_goal" output="screen">
         <rosparam command="load" file="$(find gp_navigation)/config/diff_drive/diff_drive.yaml"/>
         <remap from="odom" to="/odometry/filtered/local"/>
         <remap from="cmd_vel" to="/cmd_vel"/>
-    </node>
+    </node> -->
 
     <!-- Transformations -->
     <node name="transform_node" pkg="gp_navigation" type="transform_node.py"/>

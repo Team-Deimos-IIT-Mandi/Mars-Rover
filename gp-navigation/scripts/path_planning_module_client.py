@@ -8,8 +8,8 @@ from tf.transformations import *
 import math
 import rospy
 import actionlib
-import ros_numpy
 import numpy as np
+import ros_numpy
 
 from nav_msgs.msg import Path, Odometry
 from std_msgs.msg import ColorRGBA, Header
@@ -80,21 +80,21 @@ class PathPlanningModuleClient:
       self.y_min, self.y_max = -self.y_length / 2, self.y_length / 2
       self.x_range = self.y_range = (self.x_length / self.resolution)
 
-      self.path_pub = rospy.Publisher('/world/path', Path, queue_size=10)
+      self.path_pub = rospy.Publisher('/map/path', Path, queue_size=10)
 
       ### Visualization Publishers ###
       self.trav_map_pub = rospy.Publisher('/trav_map', PointCloud2, queue_size=10)
 
       self.path_marker = rospy.Publisher('/path_marker', Marker, queue_size=10)
 
-      self.path_viz_pub = rospy.Publisher('/world/path_viz', Path, queue_size=10)
-      self.marker_dest_pub = rospy.Publisher('/world/dest', Marker, queue_size=10)
-      self.marker_tree_pub = rospy.Publisher('/world/tree', Marker, queue_size=10)
+      self.path_viz_pub = rospy.Publisher('/map/path_viz', Path, queue_size=10)
+      self.marker_dest_pub = rospy.Publisher('/map/dest', Marker, queue_size=10)
+      self.marker_tree_pub = rospy.Publisher('/map/tree', Marker, queue_size=10)
 
 
       self.marker_tree = Marker()
       self.marker_tree.header.stamp = rospy.Time.now()
-      self.marker_tree.header.frame_id = 'world'
+      self.marker_tree.header.frame_id = 'map'
       self.marker_tree.type = Marker.LINE_LIST
       self.marker_tree.pose.orientation.w = 1.0
       self.marker_tree.scale = Vector3(0.03, 0.03, 0.03)
@@ -104,7 +104,7 @@ class PathPlanningModuleClient:
 
       self.marker_node = Marker()
       self.marker_node.header.stamp = rospy.Time.now()
-      self.marker_node.header.frame_id = 'world'
+      self.marker_node.header.frame_id = 'map'
       self.marker_node.type = Marker.SPHERE_LIST
       self.marker_node.ns = "Path"
       self.marker_node.id = 1
@@ -114,7 +114,7 @@ class PathPlanningModuleClient:
 
       self.marker_frontier = Marker()
       self.marker_frontier.header.stamp = rospy.Time.now()
-      self.marker_frontier.header.frame_id = 'world'
+      self.marker_frontier.header.frame_id = 'map'
       self.marker_frontier.type = Marker.SPHERE_LIST
       self.marker_frontier.ns = "Path"
       self.marker_frontier.id = 1
@@ -125,7 +125,7 @@ class PathPlanningModuleClient:
 
       self.marker_edge = Marker()
       self.marker_edge.header.stamp = rospy.Time.now()
-      self.marker_edge.header.frame_id = 'world'
+      self.marker_edge.header.frame_id = 'map'
       self.marker_edge.type = Marker.SPHERE_LIST
       self.marker_edge.ns = "Path"
       self.marker_edge.id = 1
@@ -152,10 +152,10 @@ class PathPlanningModuleClient:
       rospy.loginfo('PathPlanningModuleClient: Initialize params...')
       self.robot = RobotOdometryData()
 
-      self.tf_base_to_world = tf.TransformListener()
-      self.tf_world_to_base = tf.TransformListener()
-      # self.tf_base_to_world.waitForTransform('world', 'velodyne_horizontal', rospy.Time(), rospy.Duration(5.0))
-      # self.tf_world_to_base.waitForTransform('velodyne_horizontal', 'world', rospy.Time(), rospy.Duration(5.0))
+      self.tf_base_to_map = tf.TransformListener()
+      self.tf_map_to_base = tf.TransformListener()
+      # self.tf_base_to_map.waitForTransform('map', 'velodyne_horizontal', rospy.Time(), rospy.Duration(5.0))
+      # self.tf_map_to_base.waitForTransform('velodyne_horizontal', 'map', rospy.Time(), rospy.Duration(5.0))
 
       self.gp_mapping_client.send_goal(GPPointCloudGoal())
       self.gp_mapping_client.wait_for_result()
@@ -323,7 +323,7 @@ class PathPlanningModuleClient:
                                         for nd in node_list]))]
 
     def planning(self):
-      local_goal_point_stamped = self.tf_world_to_base.transformPoint('velodyne_horizontal', self.goal_point_stamped)
+      local_goal_point_stamped = self.tf_map_to_base.transformPoint('velodyne_horizontal', self.goal_point_stamped)
       local_goal_node = Node(Point(local_goal_point_stamped.point.x, local_goal_point_stamped.point.y, 0.5))
 
       start_time = time.time()
@@ -355,13 +355,13 @@ class PathPlanningModuleClient:
             y = node_new.point.y + 0.5 * math.sin(math.radians(0))
             if x ** 2 + y ** 2 > self.radius**2:
               self.frontier.append(node_new)
-              new_node_point_stamped = self.point_to_point_stamped(node_new.point, 'velodyne_horizontal', 'world')
+              new_node_point_stamped = self.point_to_point_stamped(node_new.point, 'velodyne_horizontal', 'map')
               self.marker_frontier.points.append(new_node_point_stamped.point)
 
       for node in self.nodes:
         if node.parent:
-          new_node_point_stamped = self.point_to_point_stamped(node.point, 'velodyne_horizontal', 'world')
-          new_node_parent_point_stamped = self.point_to_point_stamped(node.parent.point, 'velodyne_horizontal', 'world')
+          new_node_point_stamped = self.point_to_point_stamped(node.point, 'velodyne_horizontal', 'map')
+          new_node_parent_point_stamped = self.point_to_point_stamped(node.parent.point, 'velodyne_horizontal', 'map')
           self.marker_tree.points.append(new_node_point_stamped.point)
           self.marker_tree.points.append(new_node_parent_point_stamped.point)
           self.marker_node.points.append(new_node_point_stamped.point)
@@ -423,7 +423,7 @@ class PathPlanningModuleClient:
         point_stamped = PointStamped()
         point_stamped.point = curr_point
         point_stamped.header.frame_id = source_frame
-        return self.tf_world_to_base.transformPoint(target_frame, point_stamped)
+        return self.tf_map_to_base.transformPoint(target_frame, point_stamped)
 
     def two_node_coord_to_matrix(self, node1, node2):
         x1 = round(self.scale(node1.point.x, self.x_min, self.x_max, 0, self.x_range))
@@ -453,11 +453,11 @@ class PathPlanningModuleClient:
       # sub matrices are not full
       if mid_sub_matrix.shape[0] != size or mid_sub_matrix.shape[1] != size:
         self.frontier.append(start)
-        self.marker_frontier.points.append(self.point_to_point_stamped(start.point, 'velodyne_horizontal', 'world').point)
+        self.marker_frontier.points.append(self.point_to_point_stamped(start.point, 'velodyne_horizontal', 'map').point)
         return True
       if end_point_sub_matrix.shape[0] != size or end_point_sub_matrix.shape[1] != size:
         self.frontier.append(start)
-        self.marker_frontier.points.append(self.point_to_point_stamped(start.point, 'velodyne_horizontal', 'world').point)
+        self.marker_frontier.points.append(self.point_to_point_stamped(start.point, 'velodyne_horizontal', 'map').point)
         return True
 
       num_collisions = (end_point_sub_matrix > self.limit).sum() 
@@ -465,7 +465,7 @@ class PathPlanningModuleClient:
       if num_collisions >= size:
         if update_edge:
           self.edge.append((start_point.x, start_point.y))
-          self.marker_edge.points.append(self.point_to_point_stamped(start.point, 'velodyne_horizontal', 'world').point)
+          self.marker_edge.points.append(self.point_to_point_stamped(start.point, 'velodyne_horizontal', 'map').point)
         return True
       elif num_collisions == 0:
         # Append to Frontier
@@ -534,11 +534,11 @@ class PathPlanningModuleClient:
       return scores[0][0]
     
     def path_vizualizer(self, nodes):
-      points = [self.point_to_point_stamped(node.point, 'velodyne_horizontal', 'world').point for node in nodes]
+      points = [self.point_to_point_stamped(node.point, 'velodyne_horizontal', 'map').point for node in nodes]
 
       # Create Sphere markers
       sphere_marker = Marker()
-      sphere_marker.header.frame_id = "world"
+      sphere_marker.header.frame_id = "map"
       sphere_marker.ns = "spheres"
       sphere_marker.type = Marker.SPHERE_LIST
       # sphere_marker.action = Marker.ADD
@@ -549,7 +549,7 @@ class PathPlanningModuleClient:
 
       # Create line list marker
       line_marker = Marker()
-      line_marker.header.frame_id = "world"
+      line_marker.header.frame_id = "map"
       line_marker.ns = "line_list"
       line_marker.type = Marker.LINE_LIST
       # line_marker.action = Marker.ADD
@@ -566,7 +566,7 @@ class PathPlanningModuleClient:
       self.path_marker.publish(line_marker)
 
     def create_path(self, nodes):
-      self.path_msg.header.frame_id = 'world'
+      self.path_msg.header.frame_id = 'map'
       self.path_len = len(nodes)
 
       self.path_vizualizer(nodes)
@@ -582,10 +582,10 @@ class PathPlanningModuleClient:
         q = tft.quaternion_from_euler(0, 0, node.relative_angle)
         pose_stamped.pose.orientation = Quaternion(q[0], q[1], q[2], q[3])
 
-        world_pose_stamped = self.tf_base_to_world.transformPose('world', pose_stamped)
-        lst.append(world_pose_stamped)
-        self.path_msg.poses.append(world_pose_stamped)
-        self.path_viz.poses.append(world_pose_stamped)
+        map_pose_stamped = self.tf_base_to_map.transformPose('map', pose_stamped)
+        lst.append(map_pose_stamped)
+        self.path_msg.poses.append(map_pose_stamped)
+        self.path_viz.poses.append(map_pose_stamped)
         
       self.path_pub.publish(self.path_msg)
       self.path_viz_pub.publish(self.path_viz)
@@ -595,7 +595,7 @@ class PathPlanningModuleClient:
     def publish_marker_viz(self):
       # Origin and destination yellow markers 
       self.marker_dest = Marker()
-      self.marker_dest.header.frame_id = 'world'
+      self.marker_dest.header.frame_id = 'map'
       self.marker_dest.type = Marker.SPHERE_LIST
       self.marker_dest.action = Marker.ADD 
       self.marker_dest.pose.orientation.w = 1.0
@@ -605,12 +605,12 @@ class PathPlanningModuleClient:
       self.marker_dest_pub.publish(self.marker_dest)
 
       self.path_viz = Path()
-      self.path_viz.header.frame_id = 'world'
+      self.path_viz.header.frame_id = 'map'
 
     def plan_path_to_goal_callback(self, goal_pose_stamped):
       self.goal_point_stamped = PointStamped()
       self.goal_point_stamped.point = goal_pose_stamped.pose.position
-      self.goal_point_stamped.header.frame_id = 'world'
+      self.goal_point_stamped.header.frame_id = 'map'
       self.goal_node = Node(goal_pose_stamped.pose.position)
 
       self.nearest = None
