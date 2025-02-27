@@ -94,9 +94,8 @@ class GPMappingModule:
 
     def handle_matrix_request(self, goal):
         rospy.loginfo('GP Mapping Module: Request received...')
-        self.sph_pcl_sub = rospy.Subscriber('mid/points', PointCloud2, self.elevation_cb, queue_size=1) 
-        # self.sph_pcl_sub = rospy.Subscriber('/velodyne_points', PointCloud2, self.elevation_cb, queue_size=1) 
-
+        #self.sph_pcl_sub = rospy.Subscriber('mid/points', PointCloud2, self.elevation_cb, queue_size=1) 
+        self.sph_pcl_sub = rospy.Subscriber('/camera/depth/points', PointCloud2, self.elevation_cb, queue_size=1) 
         rospy.loginfo('Wating for magnitude pcl')
         rospy.wait_for_message('/magnitude', PointCloud2)
 

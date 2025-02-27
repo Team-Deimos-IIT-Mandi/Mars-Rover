@@ -18,7 +18,7 @@
     <node name="diff_drive_go_to_goal" pkg="diff_drive" type="diff_drive_go_to_goal" output="screen">
         <rosparam command="load" file="$(find gp_navigation)/config/diff_drive/diff_drive.yaml"/>
         <remap from="odom" to="/odometry/filtered/local"/>
-        <remap from="cmd_vel" to="/husky_velocity_controller/cmd_vel"/>
+        <remap from="cmd_vel" to="/cmd_vel"/>
     </node>
 
     <!-- Transformations -->
