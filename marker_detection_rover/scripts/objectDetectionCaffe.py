@@ -74,7 +74,7 @@ class ObjectDetector:
                 class_id = int(detections[0, 0, i, 1])
 
                 # Check if the detected class is a water bottle or a hammer (class IDs: 6 and 15 respectively)
-                if class_id in [6, 15]:
+                if class_id:# in [6, 15]:
                     # Extract bounding box coordinates
                     box = detections[0, 0, i, 3:7] * np.array([cv_image.shape[1], cv_image.shape[0], cv_image.shape[1], cv_image.shape[0]])
                     (startX, startY, endX, endY) = box.astype("int")
