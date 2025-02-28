@@ -6,6 +6,7 @@ import rospy
 import cv2
 import numpy as np
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Bool
 from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -13,7 +14,7 @@ class ObjectDetector:
     def __init__(self):
         self.image_pub = rospy.Publisher("object_detection/image", Image, queue_size=10)
         self.object_pub = rospy.Publisher("object_detection/pose", PoseStamped, queue_size=10)
-         self.AR               = rospy.Publisher("AR",Bool,queue_size=1)
+        self.AR         = rospy.Publisher("AR", Bool, queue_size=1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
         self.camera_info_sub = rospy.Subscriber("/camera/color/camera_info", CameraInfo, self.camera_info_callback)
