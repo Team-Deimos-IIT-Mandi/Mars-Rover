@@ -630,7 +630,7 @@ class PathPlanningModuleClient:
       dist = math.sqrt(math.pow(currX - self.current_goal.pose.position.x, 2) + math.pow(currY - self.current_goal.pose.position.y, 2))
 
       if dist > self.replan_distance:
-        print("Distance to local goal:", dist)
+        # print("Distance to local goal:", dist)
         pass
       else:
         self.complete = True

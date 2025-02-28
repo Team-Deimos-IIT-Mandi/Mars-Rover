@@ -1,7 +1,7 @@
 <launch>
   <arg name="visualOdom" default="true"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find rover_description)/worlds/clearpath_playpen.world"/>
+    <arg name="world_name" value="$(find rover_description)/worlds/terrain.world"/>
     <!-- change the world file based on the world you want to work with-->
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
@@ -40,7 +40,7 @@
   <include file="$(find rover_control)/launch/teleop.launch"/>
   <include file="$(find aruco_sim_rover)/launch/arucoSpawner.launch"/>
   <include file="$(find rover_navigation)/launch/move_base_mapless_demo.launch"/>
-  <include file="$(find rover_description)/launch/display.launch"/>
+  <!-- <include file="$(find rover_description)/launch/display.launch"/> -->
   <include file="$(find viso2_ros)/launch/demo.launch" if="$(arg visualOdom)"/>
 
 

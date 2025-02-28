@@ -32,6 +32,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /PointCloud21
+        - /PointCloud22
       Splitter Ratio: 0.7588235139846802
     Tree Height: 733
   - Class: rviz/Help
@@ -175,7 +176,7 @@ Visualization Manager:
       Marker Topic: /map/dest
       Name: Start/Goal
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -183,7 +184,7 @@ Visualization Manager:
       Marker Topic: /map/tree
       Name: Tree
       Namespaces:
-        {}
+        Path: true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -191,7 +192,8 @@ Visualization Manager:
       Marker Topic: /path_marker
       Name: Path
       Namespaces:
-        {}
+        line_list: true
+        spheres: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -227,7 +229,7 @@ Visualization Manager:
       Marker Topic: /edge_nodes
       Name: Edge Nodes
       Namespaces:
-        {}
+        Path: true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -235,14 +237,14 @@ Visualization Manager:
       Marker Topic: /frontier_nodes
       Name: Frontier Nodes
       Namespaces:
-        {}
+        Path: true
       Queue Size: 100
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: -0.7240493297576904
-        Min Value: -0.7921715974807739
+        Max Value: 0.991703450679779
+        Min Value: -0.15824651718139648
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -262,6 +264,34 @@ Visualization Manager:
       Size (m): 0.009999999776482582
       Style: Flat Squares
       Topic: /camera/depth/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 0.8500000238418579
+        Min Value: 0.5
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /move_base/global_costmap/rgbd_obstacle_layer/voxel_grid
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -294,17 +324,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: -0.06363547593355179
+        Y: -2.1233432292938232
+        Z: 0.21592092514038086
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8297970294952393
+      Pitch: 0.8547970652580261
       Target Frame: <Fixed Frame>
-      Yaw: 0.08136434108018875
+      Yaw: 3.6745493412017822
     Saved: ~
 Window Geometry:
   Displays:
