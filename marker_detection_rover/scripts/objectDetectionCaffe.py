@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import sys
+import os
 import rospy
 import cv2
 import numpy as np
@@ -46,8 +47,9 @@ class ObjectDetector:
 
     def detect_objects(self, cv_image):
         # Load pre-trained MobileNet SSD model
-        model_path = "MobileNetSSD_deploy.caffemodel"
-        prototxt_path = "MobileNetSSD_deploy.prototxt.txt"
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        model_path = os.path.join(script_dir, "MobileNetSSD_deploy.caffemodel")
+        prototxt_path = os.path.join(script_dir, "MobileNetSSD_deploy.prototxt.txt")
         net = cv2.dnn.readNetFromCaffe(prototxt_path, model_path)
 
         # Define classes for COCO dataset

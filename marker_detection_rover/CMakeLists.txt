@@ -171,6 +171,7 @@ include_directories(
    scripts/find_between_2.py
    scripts/spiral_search.py
    scripts/object_detect.py
+   scripts/objectDetectionCaffe.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 

@@ -9,16 +9,11 @@
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>
-    <node pkg="marker_detection_rover" type="find_between.py" name="find_between" output="screen">
-        
-    </node>
-    <node pkg="marker_detection_rover" type="find_between_1.py" name="find_between_1" output="screen">
 
-    </node>
-
-    <node pkg="marker_detection_rover" type="find_between_2.py" name="find_between_2" output="screen">
-      
-    </node>
+  <node pkg="marker_detection_rover" type="find_between.py" name="find_between" output="screen"/>
+  <node pkg="marker_detection_rover" type="find_between_1.py" name="find_between_1" output="screen"/>
+  <node pkg="marker_detection_rover" type="find_between_2.py" name="find_between_2" output="screen"/>
+  <node pkg="marker_detection_rover" type="objectDetectionCaffe" name="Caffe" output="screen"/>
     
   <node
     name="spawn_model"
