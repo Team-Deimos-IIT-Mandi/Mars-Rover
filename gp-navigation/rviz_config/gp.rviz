@@ -7,7 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
       Splitter Ratio: 0.5
-    Tree Height: 363
+    Tree Height: 365
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -24,16 +24,16 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: Traversability Map
+    SyncSource: PointCloud2
   - Class: rviz/Displays
     Help Height: 70
     Name: Displays
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Start/Goal1/Status1
+        - /PointCloud21
       Splitter Ratio: 0.7588235139846802
-    Tree Height: 727
+    Tree Height: 733
   - Class: rviz/Help
     Name: Help
 Preferences:
@@ -72,7 +72,7 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Class: rviz/RobotModel
-      Collision Enabled: false
+      Collision Enabled: true
       Enabled: true
       Links:
         All Links Enabled: true
@@ -88,18 +88,34 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
-        front_bumper_link:
+        camera_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        front_left_wheel_link:
+        camera_link_1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        front_right_wheel_link:
+        camera_link_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        camera_optical_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_optical_link_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_optical_link_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        chassis:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -108,73 +124,42 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        inertial_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        rear_bumper_link:
+        steeering3:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        rear_left_wheel_link:
+        steering1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        rear_right_wheel_link:
+        steering2:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        top_chassis_link:
+        steering4:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        top_plate_front_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_link:
+        wheel1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        top_plate_rear_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        user_rail_link:
+        wheel2:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        velodyne:
+        wheel3:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        velodyne_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        vlp16_mount_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        vlp16_mount_left_support:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        vlp16_mount_plate:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        vlp16_mount_right_support:
+        wheel4:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -187,18 +172,18 @@ Visualization Manager:
       Visual Enabled: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /world/dest
+      Marker Topic: /map/dest
       Name: Start/Goal
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /world/tree
+      Marker Topic: /map/tree
       Name: Tree
       Namespaces:
-        Path: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -206,8 +191,7 @@ Visualization Manager:
       Marker Topic: /path_marker
       Name: Path
       Namespaces:
-        line_list: true
-        spheres: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -243,7 +227,7 @@ Visualization Manager:
       Marker Topic: /edge_nodes
       Name: Edge Nodes
       Namespaces:
-        Path: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -251,14 +235,42 @@ Visualization Manager:
       Marker Topic: /frontier_nodes
       Name: Frontier Nodes
       Namespaces:
-        Path: true
+        {}
       Queue Size: 100
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: -0.7240493297576904
+        Min Value: -0.7921715974807739
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /camera/depth/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
       Value: true
   Enabled: true
   Global Options:
-    Background Color: 255; 255; 255
+    Background Color: 49; 49; 49
     Default Light: true
-    Fixed Frame: world
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -274,7 +286,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 27.7502384185791
+      Distance: 16.64168930053711
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -290,9 +302,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5647972822189331
+      Pitch: 0.8297970294952393
       Target Frame: <Fixed Frame>
-      Yaw: 3.9495487213134766
+      Yaw: 0.08136434108018875
     Saved: ~
 Window Geometry:
   Displays:
@@ -302,7 +314,7 @@ Window Geometry:
     collapsed: false
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000001560000035afc020000000afb0000001200530065006c0065006300740069006f006e000000003d0000033d0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000003d0000024a000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000100044006900730070006c006100790073010000003d0000035a000000c900fffffffb0000000800480065006c007000000002e2000000b50000006e00ffffff000000010000027c0000035afc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d0000035a000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007380000003efc0100000002fb0000000800540069006d0065010000000000000738000003bc00fffffffb0000000800540069006d00650100000000000004500000000000000000000005dc0000035a00000004000000040000000800000008fc00000002000000020000000000000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001560000035efc020000000afb0000001200530065006c0065006300740069006f006e000000003d0000033d0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000003d0000024a000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000100044006900730070006c006100790073010000003b0000035e000000c700fffffffb0000000800480065006c007000000002e2000000b50000006e00ffffff000000010000027c0000035afc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d0000035a000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007380000003efc0100000002fb0000000800540069006d00650100000000000007380000030700fffffffb0000000800540069006d00650100000000000004500000000000000000000005dc0000035e00000004000000040000000800000008fc00000002000000020000000000000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -312,5 +324,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1848
-  X: 72
-  Y: 27
+  X: -32
+  Y: -32

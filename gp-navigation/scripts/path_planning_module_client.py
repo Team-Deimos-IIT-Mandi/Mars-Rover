@@ -27,8 +27,8 @@ class RobotOdometryData:
     self.position = None
     self.orientation = None
     self.yaw = None
-    self.robot_odom_sub = rospy.Subscriber('/odometry/filtered/local', Odometry, self.robot_odom_sub)
-    rospy.wait_for_message('/odometry/filtered/local', Odometry)
+    self.robot_odom_sub = rospy.Subscriber('/odometry/filtered/global', Odometry, self.robot_odom_sub)
+    rospy.wait_for_message('/odometry/filtered/global', Odometry)
 
   def robot_odom_sub(self, odom):
     self.position = odom.pose.pose.position 
@@ -630,7 +630,7 @@ class PathPlanningModuleClient:
       dist = math.sqrt(math.pow(currX - self.current_goal.pose.position.x, 2) + math.pow(currY - self.current_goal.pose.position.y, 2))
 
       if dist > self.replan_distance:
-        # print("Distance to local goal:", dist)
+        print("Distance to local goal:", dist)
         pass
       else:
         self.complete = True
@@ -657,7 +657,7 @@ class PathPlanningModuleClient:
 
           self.path_planning_client.send_goal(req)
 
-          self.distance_to_local = rospy.Subscriber('/odometry/filtered/local', Odometry, self.distance_to_current_goal)
+          self.distance_to_local = rospy.Subscriber('/odometry/filtered/global', Odometry, self.distance_to_current_goal)
           while not self.complete:
             pass
           self.complete = False

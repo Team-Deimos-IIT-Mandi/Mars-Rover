@@ -118,13 +118,33 @@ class GPMappingModule:
       
         ################### extract points from pcl for trainging ###############
         # self.pcl_arr = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(pcl_msg, remove_nans=True)
-        pcl_arr = ros_numpy.point_cloud2.pointcloud2_to_array(pcl_msg, squeeze = True)       
+        # pcl_arr = ros_numpy.point_cloud2.pointcloud2_to_array(pcl_msg, squeeze = True)       
 
+        # self.header.seq = pcl_msg.header.seq
+        # self.header.stamp = pcl_msg.header.stamp
+        # self.pcl_size = np.shape(pcl_arr)[0]
+        # pcl_arr = np.round( np.array(pcl_arr.tolist(), dtype='float'), 4) # np.asarray(self.pcl_arr[0])
+
+        # Convert the point cloud to a structured numpy array.
+        pcl_struct = ros_numpy.point_cloud2.pointcloud2_to_array(pcl_msg, squeeze=True)
+        # Flatten the structured array (in case it’s organized in a 2D grid).
+        pcl_struct = pcl_struct.flatten()
+
+        # Build a list of valid points (x, y, z, intensity) filtering out any points with NaN values.
+        pcl_list = []
+        for pt in pcl_struct:
+            vals = [pt['x'], pt['y'], pt['z'], pt[3]]
+            if np.all(np.isfinite(vals)):
+                pcl_list.append(vals)
+
+        # Convert the list to a regular numpy array and round values.
+        pcl_arr = np.round(np.array(pcl_list, dtype='float32'), 4)   
+        # print(pcl_msg, "\n\n", "pcl_arr: ", pcl_arr)
         self.header.seq = pcl_msg.header.seq
         self.header.stamp = pcl_msg.header.stamp
         self.pcl_size = np.shape(pcl_arr)[0]
         pcl_arr = np.round( np.array(pcl_arr.tolist(), dtype='float'), 4) # np.asarray(self.pcl_arr[0])
-        pcl_arr
+
         print('pcl_arr shape: ', np.shape(pcl_arr) )
 
         ### downsample_pcl
