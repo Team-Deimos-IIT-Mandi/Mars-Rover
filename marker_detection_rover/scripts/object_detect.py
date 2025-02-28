@@ -9,6 +9,7 @@ from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Bool
 from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
+import tf
 
 class ObjectDetector:
     def __init__(self):
