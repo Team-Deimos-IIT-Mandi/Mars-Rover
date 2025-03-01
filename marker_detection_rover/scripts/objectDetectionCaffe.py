@@ -9,6 +9,7 @@ import numpy as np
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
+import tf
 
 class ObjectDetector:
     def __init__(self):
@@ -39,11 +40,11 @@ class ObjectDetector:
             self.publish_object(obj)
 
         # Publish annotated image (optional)
-        annotated_image = self.annotate_image(cv_image, detected_objects)
-        try:
-            self.image_pub.publish(self.bridge.cv2_to_imgmsg(annotated_image, "bgr8"))
-        except CvBridgeError as e:
-            print(e)
+        #annotated_image = self.annotate_image(cv_image, detected_objects)
+       # try:
+        #    self.image_pub.publish(self.bridge.cv2_to_imgmsg(annotated_image, "bgr8"))
+        #except CvBridgeError as e:
+        #    print(e)
 
     def detect_objects(self, cv_image):
         # Load pre-trained MobileNet SSD model
@@ -70,11 +71,12 @@ class ObjectDetector:
             confidence = detections[0, 0, i, 2]
 
             # Filter out weak detections by confidence threshold
-            if confidence > 0.5:
+            if confidence > 0.8:
                 class_id = int(detections[0, 0, i, 1])
-
+         
                 # Check if the detected class is a water bottle or a hammer (class IDs: 6 and 15 respectively)
                 if class_id:# in [6, 15]:
+                    rospy.loginfo(class_id)
                     # Extract bounding box coordinates
                     box = detections[0, 0, i, 3:7] * np.array([cv_image.shape[1], cv_image.shape[0], cv_image.shape[1], cv_image.shape[0]])
                     (startX, startY, endX, endY) = box.astype("int")
@@ -83,18 +85,29 @@ class ObjectDetector:
                     obj_x = (startX + endX) / 2
                     obj_y = (startY + endY) / 2
                     obj_z = 0  # Assuming 2D detection
-
+                    cv2.rectangle(cv_image, (startX, startY), (endX, endY), (0, 255, 0), 2)
                     # Create PoseStamped message for the detected object
                     obj_pose = PoseStamped()
-                    obj_pose.header.frame_id = "camera_realsense_link"  # Adjust frame ID according to your setup
+                    obj_pose.header.frame_id = "camera_link"  # Adjust frame ID according to your setup
                     obj_pose.pose.position.x = obj_x
                     obj_pose.pose.position.y = obj_y
                     obj_pose.pose.position.z = obj_z
                     obj_pose.pose.orientation.w = 1.0  # Assuming no rotation
-
+                    try:
+                        listener = tf.TransformListener()
+                        listener.waitForTransform('odom', 'camera_link', rospy.Time(0), rospy.Duration(1.0))
+                        transformed_pose = listener.transformPose('odom', obj_pose)
+                        rospy.loginfo([transformed_pose.pose.position.x, transformed_pose.pose.position.y])
+                        
+                        # Now publish the transformed pose in the odom frame
+                        detected_objects.append(transformed_pose)
+                        
+                    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
+                        rospy.logerr("TF Exception: %s", e)
                     # Append the detected object pose to the list
-                    detected_objects.append(obj_pose)
-
+        cv2.imshow("Image window", cv_image)
+        if cv2.waitKey(3) & 0xFF == ord('q'):
+            pass         
         return detected_objects
 
     def publish_object(self, obj_pose):

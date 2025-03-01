@@ -65,7 +65,7 @@ class ObjectDetector:
         detections = net.forward()
 
         detected_objects = []
-          
+        
         # Loop over the detections
         for i in range(detections.shape[2]):
             confidence = detections[0, 0, i, 2]
@@ -79,7 +79,7 @@ class ObjectDetector:
                     # Extract bounding box coordinates
                     box = detections[0, 0, i, 3:7] * np.array([cv_image.shape[1], cv_image.shape[0], cv_image.shape[1], cv_image.shape[0]])
                     (startX, startY, endX, endY) = box.astype("int")
-
+                    
                     # Extract object position (center of the bounding box)
                     obj_x = (startX + endX) / 2
                     obj_y = (startY + endY) / 2
