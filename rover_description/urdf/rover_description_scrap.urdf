@@ -1,0 +1,872 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+        Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+        For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+    <robot name="mars_rover" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <link name = "base_link"/>
+    <link name = "base_footprint"/>
+
+    <joint name="base_footprint_tf" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="base_footprint"/>
+    </joint>
+
+      <link
+        name="chassis">
+        <inertial>
+          <origin
+            xyz="-0.169915088395825 -0.00199596460135764 -0.00919692919066987"
+            rpy="0 0 0" />
+          <mass
+            value="14.4435926271869" />
+          <inertia
+            ixx="0.0717912278135852"
+            ixy="-7.70091070297908E-07"
+            ixz="-6.88067299368864E-07"
+            iyy="0.298762417937452"
+            iyz="2.41721140540893E-08"
+            izz="0.359670360949306" />
+        </inertial>
+        <visual>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/base_link.STL" />
+          </geometry>
+          <material
+            name="">
+            <color
+              rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+          </material>
+        </visual>
+        <collision>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/base_link.STL" />
+          </geometry>
+        </collision>
+      </link>
+
+      <joint name="connector" type="fixed">
+        <origin xyz="0 0 0.4" rpy="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="chassis"/>
+      </joint>
+
+      <link
+        name="steering1">
+        <inertial>
+          <origin
+            xyz="0.000525112226394842 -0.0335326994132589 -0.193802692885311"
+            rpy="0 0 0" />
+          <mass
+            value="6.64830273269256" />
+          <inertia
+            ixx="0.0236327074483744"
+            ixy="1.53496169623355E-05"
+            ixz="6.57674614863919E-06"
+            iyy="0.019303321564257"
+            iyz="-0.00126381697267368"
+            izz="0.0217357170628441" />
+        </inertial>
+        <visual>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/steering1.STL" />
+          </geometry>
+          <material
+            name="">
+            <color
+              rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+          </material>
+        </visual>
+        <collision>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/steering1.STL" />
+          </geometry>
+        </collision>
+      </link>
+      <joint
+        name="steer1"
+        type="revolute">
+        <origin
+          xyz="-0.52941 0.29162 -0.12851"
+          rpy="0 -1.8353E-05 0" />
+        <parent
+          link="chassis" />
+        <child
+          link="steering1" />
+        <axis
+          xyz="0 0 1" />
+        <limit effort="10" velocity="6.28"  lower="-1.57" upper="1.57" />
+      </joint>
+      <link
+        name="wheel1">
+        <inertial>
+          <origin
+            xyz="-0.000142261151015677 0.000391028851553232 -0.067999985619256"
+            rpy="0 0 0" />
+          <mass
+            value="1.96171696755186" />
+          <inertia
+            ixx="0.0111765177053231"
+            ixy="3.63484716438248E-14"
+            ixz="-9.83139513884305E-10"
+            iyy="0.0111765177116241"
+            iyz="-1.70424653629502E-07"
+            izz="0.0157859329323531" />
+        </inertial>
+        <visual>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/wheel1.STL" />
+          </geometry>
+          <material
+            name="">
+            <color
+              rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+          </material>
+        </visual>
+        <collision>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+				        <cylinder radius="0.11" length="0.144"/>
+			   </geometry>
+        </collision>
+      </link>
+      <joint
+        name="wheel_1"
+        type="continuous">
+        <origin
+          xyz="0.000353156675627797 0.0676257237290513 -0.216586122585117"
+          rpy="-1.5708332999603 1.83526331234849E-05 0.00321478961806723" />
+        <parent
+          link="steering1" />
+        <child
+          link="wheel1" />
+        <axis
+          xyz="0 0 1" />
+      </joint>
+      <link
+        name="steering2">
+        <inertial>
+          <origin
+            xyz="-0.000474889077884733 0.0341947940956224 -0.19380284134621"
+            rpy="0 0 0" />
+          <mass
+            value="6.64830400801289" />
+          <inertia
+            ixx="0.0236304005612626"
+            ixy="0.000114678117693231"
+            ixz="-3.02547344080121E-05"
+            iyy="0.019306197957872"
+            iyz="0.00125759688431803"
+            izz="0.0217350588985547" />
+        </inertial>
+        <visual>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/steering2.STL" />
+          </geometry>
+          <material
+            name="">
+            <color
+              rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+          </material>
+        </visual>
+        <collision>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/steering2.STL" />
+          </geometry>
+        </collision>
+      </link>
+      <joint
+        name="steer2"
+        type="revolute">
+        <origin
+          xyz="-0.52941 -0.29588 -0.1285"
+          rpy="0 0 0" />
+        <parent
+          link="chassis" />
+        <child
+          link="steering2" />
+        <axis
+          xyz="0 0 1" />
+        <limit effort="10" velocity="6.28"  lower="-1.57" upper="1.57" />
+      </joint>
+      <link
+        name="wheel2">
+        <inertial>
+          <origin
+            xyz="-0.000413021540613123 -2.44790194104949E-05 0.0679999999991169"
+            rpy="0 0 0" />
+          <mass
+            value="1.96171696755186" />
+          <inertia
+            ixx="0.0111765177053229"
+            ixy="1.46936453891669E-17"
+            ixz="-1.59919820441612E-18"
+            iyy="0.0111765177053229"
+            iyz="-1.6690363377749E-17"
+            izz="0.0157859329386544" />
+        </inertial>
+        <visual>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/wheel2.STL" />
+          </geometry>
+          <material
+            name="">
+            <color
+              rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+          </material>
+        </visual>
+        <collision>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+				        <cylinder radius="0.11" length="0.144"/>
+			   </geometry>
+        </collision>
+      </link>
+      <joint
+        name="wheel_2"
+        type="continuous">
+        <origin
+          xyz="0.00260503655999339 -0.0673405250297557 -0.216999105202697"
+          rpy="-1.5707963267949 0 0.0261401718711602" />
+        <parent
+          link="steering2" />
+        <child
+          link="wheel2" />
+        <axis
+          xyz="0 0 1" />
+      </joint>
+      <link
+        name="steeering3">
+        <inertial>
+          <origin
+            xyz="-0.000416600731458772 0.0335152875528032 -0.193802433433151"
+            rpy="0 0 0" />
+          <mass
+            value="6.64830392215954" />
+          <inertia
+            ixx="0.0236333353649771"
+            ixy="1.52860727031699E-06"
+            ixz="-3.17219019035638E-06"
+            iyy="0.0193032353280473"
+            iyz="0.00126391062872571"
+            izz="0.0217350863633826" />
+        </inertial>
+        <visual>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/steeering3.STL" />
+          </geometry>
+          <material
+            name="">
+            <color
+              rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+          </material>
+        </visual>
+        <collision>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/steeering3.STL" />
+          </geometry>
+        </collision>
+      </link>
+      <joint
+        name="steer_3"
+        type="revolute">
+        <origin
+          xyz="0.32344 -0.29562 -0.1285"
+          rpy="0 0 0" />
+        <parent
+          link="chassis" />
+        <child
+          link="steeering3" />
+        <axis
+          xyz="0 0 1" />
+        <limit effort="10" velocity="6.28"  lower="-1.57" upper="1.57" />
+      </joint>
+      <link
+        name="wheel3">
+        <inertial>
+          <origin
+            xyz="0.00012752326976001 0.000393603647906415 0.0679999999986239"
+            rpy="0 0 0" />
+          <mass
+            value="1.96171696755186" />
+          <inertia
+            ixx="0.0111765177053229"
+            ixy="1.46784681409658E-17"
+            ixz="-1.1367644329826E-15"
+            iyy="0.0111765177053229"
+            iyz="-3.63032951516692E-17"
+            izz="0.0157859329386544" />
+        </inertial>
+        <visual>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/wheel3.STL" />
+          </geometry>
+          <material
+            name="">
+            <color
+              rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+          </material>
+        </visual>
+        <collision>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+				        <cylinder radius="0.11" length="0.144"/>
+			   </geometry>
+        </collision>
+      </link>
+      <joint
+        name="wheel_3"
+        type="continuous">
+        <origin
+          xyz="-0.000555418729084156 -0.067625619393596 -0.216581022537134"
+          rpy="-1.5707963267949 0 0" />
+        <parent
+          link="steeering3" />
+        <child
+          link="wheel3" />
+        <axis
+          xyz="0 0 1" />
+      </joint>
+      <link
+        name="steering4">
+        <inertial>
+          <origin
+            xyz="-0.00011106391877802 -0.0338081154233735 -0.19380292769291"
+            rpy="0 0 0" />
+          <mass
+            value="6.64830259385427" />
+          <inertia
+            ixx="0.0236324149128355"
+            ixy="4.11539442084093E-05"
+            ixz="8.21164009695582E-06"
+            iyy="0.0193036407758429"
+            iyz="-0.00125789757300897"
+            izz="0.0217356897618841" />
+        </inertial>
+        <visual>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/steering4.STL" />
+          </geometry>
+          <material
+            name="">
+            <color
+              rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+          </material>
+        </visual>
+        <collision>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            <mesh
+              filename="package://rover_description/meshes/steering4.STL" />
+          </geometry>
+        </collision>
+      </link>
+      <joint
+        name="steer4"
+        type="revolute">
+        <origin
+          xyz="0.32345 0.29186 -0.12849"
+          rpy="0 -1.8353E-05 0" />
+        <parent
+          link="chassis" />
+        <child
+          link="steering4" />
+        <axis
+          xyz="0 0 1" />
+        <limit effort="10" velocity="6.28"  lower="-1.57" upper="1.57" />
+      </joint>
+      <link
+        name="wheel4">
+        <inertial>
+          <origin
+            xyz="0.000413714800629517 -5.10683655707833E-06 -0.0679999999999992"
+            rpy="0 0 0" />
+          <mass
+            value="1.96171696755186" />
+          <inertia
+            ixx="0.0111765177053229"
+            ixy="7.33822171003051E-18"
+            ixz="-1.84314369322536E-18"
+            iyy="0.011176517705323"
+            iyz="-2.23015354728552E-17"
+            izz="0.0157859329386545" />
+        </inertial>
+        <visual>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+            
+            <mesh
+              filename="package://rover_description/meshes/wheel4.STL" />
+          </geometry>
+          <material
+            name="">
+            <color
+              rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+          </material>
+        </visual>
+        <collision>
+          <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+				        <cylinder radius="0.11" length="0.144"/>
+			   </geometry>
+        </collision>
+      </link>
+      <joint
+        name="wheel_4"
+        type="continuous">
+        <origin
+          xyz="-0.00146559562126541 0.0673855594536285 -0.21697972522299"
+          rpy="-1.5707963246485 1.83519361346148E-05 0.00917303616199558" />
+        <parent
+          link="steering4" />
+        <child
+          link="wheel4" />
+        <axis
+          xyz="0 0 1" />
+      </joint>
+
+    <transmission name="wheel_1_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="wheel_1">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_1">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="wheel_2_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="wheel_2">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_2">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="wheel_3_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="wheel_3">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_3">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="wheel_4_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="wheel_4">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_4">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+    
+    <transmission name="steer_1_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="steer1">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_steer_1">
+        <mechanicalReduction>30</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="steer_2_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="steer2">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_steer_2">
+        <mechanicalReduction>30</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="steer_3_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="steer_3">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_steer_3">
+        <mechanicalReduction>30</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="steer_4_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="steer4">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_steer_4">
+        <mechanicalReduction>30</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+ <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+    </plugin>
+  </gazebo>
+
+<link name="camera_link">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.1 0.1 0.1"/> <!-- Example visual geometry, adjust as needed -->
+    </geometry>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.1 0.1 0.1"/> <!-- Example collision geometry, adjust as needed -->
+    </geometry>
+  </collision>
+</link>
+<link name="camera_link_1">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.1 0.1 0.1"/> <!-- Example visual geometry, adjust as needed -->
+    </geometry>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.1 0.1 0.1"/> <!-- Example collision geometry, adjust as needed -->
+    </geometry>
+  </collision>
+</link>
+<link name="camera_link_2">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.1 0.1 0.1"/> <!-- Example visual geometry, adjust as needed -->
+    </geometry>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.1 0.1 0.1"/> <!-- Example collision geometry, adjust as needed -->
+    </geometry>
+  </collision>
+</link>
+<link name="camera_optical_link">
+</link>
+<joint name="camera_optical_joint" type="fixed">
+  <parent link="camera_link"/>
+  <child link="camera_optical_link"/>
+  <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/> <!-- Adjust position as needed -->
+</joint>
+<link name="camera_optical_link_1">
+</link>
+<joint name="camera_optical_joint_1" type="fixed">
+  <parent link="camera_link_1"/>
+  <child link="camera_optical_link_1"/>
+  <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/> <!-- Adjust position as needed -->
+</joint>
+<link name="camera_optical_link_2">
+</link>
+<joint name="camera_optical_joint_2" type="fixed">
+  <parent link="camera_link_2"/>
+  <child link="camera_optical_link_2"/>
+  <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/> <!-- Adjust position as needed -->
+</joint>
+<joint name="camera_joint" type="fixed">
+  <parent link="chassis"/>
+  <child link="camera_link"/>
+  <origin xyz="0.1 0 0.1" rpy="0 0 0"/> <!-- Adjust position as needed -->
+</joint>
+<joint name="camera_joint_1" type="fixed">
+  <parent link="chassis"/>
+  <child link="camera_link_1"/>
+  <origin xyz="0.1 0 0.1" rpy="0 0 0"/> <!-- Adjust position as needed -->
+</joint>
+<joint name="camera_joint_2" type="fixed">
+  <parent link="chassis"/>
+  <child link="camera_link_2"/>
+  <origin xyz="0.1 0 0.1" rpy="0 0 0"/> <!-- Adjust position as needed -->
+</joint>
+<gazebo reference="camera_link">
+  <sensor name="kinect_camera" type="depth">
+    <update_rate>100</update_rate>
+    <camera>
+      <horizontal_fov>1.047198</horizontal_fov>
+      <image>
+        <width>640</width>
+        <height>480</height>
+        <format>R8G8B8</format>
+      </image>
+      <clip>
+        <near>0.05</near>
+        <far>3</far>
+      </clip>
+    </camera>
+    <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
+          <baseline>0.2</baseline>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>camera_ir</cameraName>
+          <imageTopicName>/camera/color/image_raw</imageTopicName>
+          <cameraInfoTopicName>/camera/color/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>/camera/depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
+          <frameName>camera_optical_link</frameName>
+          <pointCloudCutoff>0.5</pointCloudCutoff>
+          <pointCloudCutoffMax>3.0</pointCloudCutoffMax>
+          <distortionK1>0</distortionK1>
+          <distortionK2>0</distortionK2>
+          <distortionK3>0</distortionK3>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+          <CxPrime>0</CxPrime>
+          <Cx>0</Cx>
+          <Cy>0</Cy>
+          <focalLength>0</focalLength>
+          <hackBaseline>0</hackBaseline>
+        </plugin>
+  </sensor>
+</gazebo>
+<!-- Camera plugin -->
+<gazebo reference="camera_link_1">
+  <sensor name="kinect_camera" type="depth">
+    <update_rate>100</update_rate>
+    <camera>
+      <horizontal_fov>1.047198</horizontal_fov>
+      <image>
+        <width>640</width>
+        <height>480</height>
+        <format>R8G8B8</format>
+      </image>
+      <clip>
+        <near>0.05</near>
+        <far>3</far>
+      </clip>
+    </camera>
+    <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
+          <baseline>0.2</baseline>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>camera_ir</cameraName>
+          <imageTopicName>/camera/color/image_raw</imageTopicName>
+          <cameraInfoTopicName>/camera/color/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>/camera/depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
+          <frameName>camera_optical_link_1</frameName>
+          <pointCloudCutoff>0.5</pointCloudCutoff>
+          <pointCloudCutoffMax>3.0</pointCloudCutoffMax>
+          <distortionK1>0</distortionK1>
+          <distortionK2>0</distortionK2>
+          <distortionK3>0</distortionK3>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+          <CxPrime>0</CxPrime>
+          <Cx>0</Cx>
+          <Cy>0</Cy>
+          <focalLength>0</focalLength>
+          <hackBaseline>0</hackBaseline>
+        </plugin>
+  </sensor>
+</gazebo>
+<gazebo reference="camera_link_2">
+  <sensor name="kinect_camera" type="depth">
+    <update_rate>100</update_rate>
+    <camera>
+      <horizontal_fov>1.047198</horizontal_fov>
+      <image>
+        <width>640</width>
+        <height>480</height>
+        <format>R8G8B8</format>
+      </image>
+      <clip>
+        <near>0.05</near>
+        <far>3</far>
+      </clip>
+    </camera>
+    <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
+          <baseline>0.2</baseline>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>camera_ir</cameraName>
+          <imageTopicName>/camera/color/image_raw</imageTopicName>
+          <cameraInfoTopicName>/camera/color/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>/camera/depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
+          <frameName>camera_optical_link_2</frameName>
+          <pointCloudCutoff>0.5</pointCloudCutoff>
+          <pointCloudCutoffMax>3.0</pointCloudCutoffMax>
+          <distortionK1>0</distortionK1>
+          <distortionK2>0</distortionK2>
+          <distortionK3>0</distortionK3>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+          <CxPrime>0</CxPrime>
+          <Cx>0</Cx>
+          <Cy>0</Cy>
+          <focalLength>0</focalLength>
+          <hackBaseline>0</hackBaseline>
+        </plugin>
+  </sensor>
+</gazebo>
+<gazebo reference="camera_link">
+  <sensor name="kinect_camera" type="depth">
+    <update_rate>100</update_rate>
+    <camera>
+      <horizontal_fov>1.047198</horizontal_fov>
+      <image>
+        <width>640</width>
+        <height>480</height>
+        <format>R8G8B8</format>
+      </image>
+      <clip>
+        <near>0.05</near>
+        <far>3</far>
+      </clip>
+    </camera>
+    <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
+          <baseline>0.2</baseline>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>camera_ir</cameraName>
+          <imageTopicName>/camera/color/image_raw</imageTopicName>
+          <cameraInfoTopicName>/camera/color/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>/camera/depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
+          <frameName>camera_optical_link</frameName>
+          <pointCloudCutoff>0.5</pointCloudCutoff>
+          <pointCloudCutoffMax>3.0</pointCloudCutoffMax>
+          <distortionK1>0</distortionK1>
+          <distortionK2>0</distortionK2>
+          <distortionK3>0</distortionK3>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+          <CxPrime>0</CxPrime>
+          <Cx>0</Cx>
+          <Cy>0</Cy>
+          <focalLength>0</focalLength>
+          <hackBaseline>0</hackBaseline>
+        </plugin>
+  </sensor>
+</gazebo>
+
+
+<!-- IMU implementation -->
+<link name="imu_link">
+</link>
+<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+<joint name="imu_joint" type="fixed">
+<parent link="chassis"/>
+<child link="imu_link"/>
+</joint>
+
+<gazebo reference="imu_link">
+    <gravity>true</gravity>
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <topic>__default_topic__</topic>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <topicName>/imu/data</topicName>
+        <bodyName>imu_link</bodyName>
+        <updateRateHZ>10.0</updateRateHZ>
+        <gaussianNoise>0.0</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+        <initialOrientationAsReference>false</initialOrientationAsReference>
+      </plugin>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+  </gazebo>
+
+
+  <!-- GPS implementation on rover -->
+
+<gazebo>
+  <plugin name="gazebo_ros_gps" filename="libhector_gazebo_ros_gps.so">
+    <robotNamespace>mars_rover</robotNamespace>
+    <updateRate>40.0</updateRate>
+    <bodyName>base_link</bodyName>
+    <frameId>base_link</frameId>
+    <topicName>/gps/fix</topicName>
+    <velocityTopicName>/gps/vel</velocityTopicName>
+    <referenceLatitude>31.7754</referenceLatitude>
+    <referenceLongitude>76.9861</referenceLongitude>
+    <referenceHeading>20</referenceHeading>
+    <referenceAltitude>10</referenceAltitude>
+    <offset>0 0 0</offset>
+    <drift>0 0 0</drift>
+    <gaussianNoise>0.05 0.05 0.05</gaussianNoise>
+    <velocityDrift>0.0001 0.0001 0.0001</velocityDrift>
+    <velocityGaussianNoise>0.5 0.5 0.5</velocityGaussianNoise>
+</plugin>
+</gazebo>
+
+    </robot>

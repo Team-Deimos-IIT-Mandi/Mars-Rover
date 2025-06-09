@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find rover_control)/config/control_swerve.yaml" command="load"/>
+
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager"
+		type="spawner" output="screen" 
+		args="joint_state_controller mars_rover">
+  </node>
+
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+		type="robot_state_publisher" respawn="true" output="screen">
+  </node>
+
+  <arg name="enable_ekf" default="true"/>
+
+  <group if="$(arg enable_ekf)" >
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_local">
+      <rosparam command="load" file="$(find rover_control)/config/localization.yaml" />
+      <remap from="/odometry/filtered" to="/odometry/filtered/local"/>
+    </node>
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_tranform">
+      <remap from="/gps/fix" to="/gps/fix"/>
+      <remap from="/odometry/filtered" to="/odometry/filtered/global"/>
+      <rosparam command="load" file="$(find rover_control)/config/navsat_transform.yaml" />
+    </node>
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_global">
+      <remap from="/odometry/filtered" to="/odometry/filtered/global"/>
+      <rosparam command="load" file="$(find rover_control)/config/gps_localization.yaml" />
+    </node>
+  </group>
+
+  <node pkg="interactive_marker_twist_server" type="marker_server" name="twist_marker_server" output="screen">
+    <param name="link_name" value="base_link" />
+  </node>
+
+  <node pkg="twist_mux" type="twist_mux" name="twist_mux">
+    <rosparam command="load" file="$(find rover_control)/config/twist_mux.yaml" />
+    <remap from="cmd_vel_out" to="/mars_rover/cmd_vel"/>
+  </node>
+
+</launch>

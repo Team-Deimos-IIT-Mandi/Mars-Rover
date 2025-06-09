@@ -1,0 +1,9 @@
+<launch>
+    <!-- Launch the state machine node -->
+    <node name="rover_state_machine" pkg="smach_rover" type="state_machine.py" output="screen">
+        <!-- You can set initial task as 'idle' -->
+        <param name="/smach/task_command" value="idle" />
+    </node>
+
+    <!-- (Optional) You can also launch other essential nodes required for the rover, like sensors, controllers, etc., here -->
+</launch>

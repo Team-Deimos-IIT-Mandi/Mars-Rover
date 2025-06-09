@@ -1,0 +1,34 @@
+<launch>
+   <rosparam param="use_sim_time">True</rosparam>
+  <!-- Start gazebo world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+  <!-- OR -->
+  <!-- Start four_wheel_steering -->
+  <node name="four_wheel_steering"
+      pkg="four_wheel_steering_controller"
+      type="four_wheel_steering" output="screen"/>
+
+  <!-- load robot -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro '$(find four_wheel_steering_controller)/test/urdf/four_wheel_steering.urdf.xacro'" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <!-- Load controller config -->
+  <rosparam command="load" file="$(find four_wheel_steering_controller)/test/config/four_wheel_steering_controller_4ws_cmd.yaml" />
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="spawn_four_wheel_steering" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -param robot_description -model four_wheel_steering -z 0.5" respawn="false" output="screen" />
+
+  <!-- Spawn controller -->
+  <node name="controller_spawner"
+        pkg="controller_manager" type="spawner" output="screen"
+        args="robot_joint_publisher four_wheel_steering_controller --shutdown-timeout 3"/>
+
+ <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_kb" output="screen">
+    <param name="speed" value="0.5" />  <!-- Adjust speed if necessary -->
+    <param name="turn" value="1.0" />   <!-- Adjust turn rate if necessary -->
+    <remap from="cmd_vel" to="/four_wheel_steering_controller/cmd_vel"/>
+  </node>
+</launch>

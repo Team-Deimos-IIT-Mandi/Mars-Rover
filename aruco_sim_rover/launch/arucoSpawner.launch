@@ -1,0 +1,25 @@
+<launch>
+    <!-- Argument definitions for model, position, and orientation -->
+    <arg name="x" default="4"/>
+    <arg name="y" default="2"/>
+    <arg name="z" default="0"/>
+    <arg name="roll" default="0"/>
+    <arg name="pitch" default="0"/>
+    <arg name="yaw" default="1"/>
+    <arg name="robot_name" default="aruco_sim_rover"/>
+    <arg name="node_name" default="urdf_spawner"/>
+    <arg name="model_name" default="arucoMarker1"/>
+    <arg name="model_file" default="arucoMarker0.dae"/>
+
+    <!-- Load the xacro model file into the robot description parameter -->
+    <param name="robot_description_aruco" command="$(find xacro)/xacro '$(find aruco_sim_rover)/urdf/aruco_marker.xacro' model_file:=$(arg model_file)" />
+
+ 
+
+    <!-- Spawn the URDF model in Gazebo -->
+    <node name="$(arg node_name)" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+        args="-urdf -param robot_description_aruco -model $(arg model_name)
+              -x $(arg x) -y $(arg y) -z $(arg z)
+              -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)" />
+	
+</launch>

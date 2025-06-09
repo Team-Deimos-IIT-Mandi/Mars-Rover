@@ -1,0 +1,14 @@
+<launch>
+  <arg
+    name="model" />
+  <param
+    name="robot_description"
+    textfile="$(find rover_description)/urdf/rover_description.urdf" />
+  
+ 
+  <node
+    name="rviz"
+    pkg="rviz"
+    type="rviz"
+    args="-d $(find rover_description)/rviz/rviz_image.rviz" />
+</launch>
