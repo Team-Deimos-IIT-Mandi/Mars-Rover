@@ -53,15 +53,51 @@ pip install opencv-contrib-python==4.2.0.32
 
 - **urdf_geometry_parser** : Include scripts that help in parsing and extracting geometric information from the URDF files.
 
+##Using Pre-built Docker Image
 
+#Requirements
+
+Before running the simulation, install:
+1. Docker
+- Download and install Docker from:  
+  [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
+
+- Verify installation:
+  ```bash
+  docker --version```
+2. VcXsrv (for GUI)
+Download VcXsrv from:
+https://sourceforge.net/projects/vcxsrv/
+
+After installation, launch XLaunch with:
+Display number: 0
+Start no client
+
+#Pull the Docker Image
+```bash
+docke pull robotronicsiitmandi/mars_rover_sim:latest```
+
+#Run the Simulation
+Once Docker and VcXsrv are running:
+```bash
+docker run -it \
+  --network=host \
+  --env="ROS_MASTER_URI=http://localhost:11311" \
+  --env="ROS_HOSTNAME=localhost" \
+  --env="DISPLAY=host.docker.internal:0.0" \
+  --env="LIBGL_ALWAYS_INDIRECT=0" \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  robotronicsiitmandi/mars_rover_sim:latest```
+
+#Exec into the container
+```bash
+docker exec -it <container_name_or_id> /bin/bash```
 
 ## Working instructions
-
-
 
 To launch the rover in Gazebo along with Aruco markers, detect them, perform spiral search (not correctly working) and teleoperate using keyboard/joystick.
 
 ```bash
-roslaunch rover_description Rover_spawn_with_aruco_detection.launch
+roslaunch rover_description main.launch
 ```
 
