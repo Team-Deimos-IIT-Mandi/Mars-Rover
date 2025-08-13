@@ -75,7 +75,7 @@ Start no client
 
 #Pull the Docker Image
 ```bash
-docker pull mridul258612/mars_rover_sim:latest```
+docke pull robotronicsiitmandi/mars_rover_sim:latest```
 
 #Run the Simulation
 Once Docker and VcXsrv are running:
@@ -87,7 +87,7 @@ docker run -it \
   --env="DISPLAY=host.docker.internal:0.0" \
   --env="LIBGL_ALWAYS_INDIRECT=0" \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
-  mridul258612/mars_rover_sim:latest```
+  robotronicsiitmandi/mars_rover_sim:latest```
 
 #Exec into the container
 ```bash
