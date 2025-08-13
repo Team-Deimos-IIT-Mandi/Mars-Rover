@@ -64,7 +64,8 @@ Before running the simulation, install:
 
 - Verify installation:
   ```bash
-  docker --version```
+  docker --version
+```
 2. VcXsrv (for GUI)
 Download VcXsrv from:
 https://sourceforge.net/projects/vcxsrv/
@@ -75,7 +76,8 @@ Start no client
 
 #Pull the Docker Image
 ```bash
-docke pull robotronicsiitmandi/mars_rover_sim:latest```
+docker pull robotronicsiitmandi/mars_rover_sim:latest
+```
 
 #Run the Simulation
 Once Docker and VcXsrv are running:
@@ -87,11 +89,13 @@ docker run -it \
   --env="DISPLAY=host.docker.internal:0.0" \
   --env="LIBGL_ALWAYS_INDIRECT=0" \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
-  robotronicsiitmandi/mars_rover_sim:latest```
+  robotronicsiitmandi/mars_rover_sim:latest
+```
 
 #Exec into the container
 ```bash
-docker exec -it <container_name_or_id> /bin/bash```
+docker exec -it <container_name_or_id> /bin/bash
+```
 
 ## Working instructions
 
