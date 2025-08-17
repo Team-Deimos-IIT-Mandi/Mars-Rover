@@ -1,0 +1,57 @@
+name: "Build, Test, and Deploy ROS Container"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:   # ✅ manual trigger
+  schedule:            # ✅ nightly trigger
+    - cron: "0 0 * * *"   # runs every day at 00:00 UTC
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout repository code"
+        uses: actions/checkout@v4
+
+      - name: "Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+
+      - name: "Build Docker image for testing"
+        run: docker build -t robotronicsiitmandi/mars_rover_sim:latest .
+
+      - name: "Debug: List available ROS packages"
+        run: |
+          echo "=== Checking container startup ==="
+          docker run --rm robotronicsiitmandi/mars_rover_sim:latest echo "Container started successfully"
+          
+          echo "=== Available ROS packages ==="
+          docker run --rm robotronicsiitmandi/mars_rover_sim:latest bash -c "rospack list"
+  push-to-registry:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: "Checkout repository code"
+        uses: actions/checkout@v4
+      - name: "Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+      - name: "Login to Docker Hub"
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: "Set up Docker metadata"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: robotronicsiitmandi/mars_rover_sim
+      - name: "Build and push Docker image"
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}                                                        
