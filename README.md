@@ -76,20 +76,13 @@ Start no client
 
 #Pull the Docker Image
 ```bash
-docker pull robotronicsiitmandi/mars_rover_sim:latest
+docker pull teamdeimosiitmd/mars_rover:latest
 ```
 
 #Run the Simulation
 Once Docker and VcXsrv are running:
 ```bash
-docker run -it \
-  --network=host \
-  --env="ROS_MASTER_URI=http://localhost:11311" \
-  --env="ROS_HOSTNAME=localhost" \
-  --env="DISPLAY=host.docker.internal:0.0" \
-  --env="LIBGL_ALWAYS_INDIRECT=0" \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \
-  robotronicsiitmandi/mars_rover_sim:latest
+docker run -it  --network=host  --env="ROS_MASTER_URI=http://localhost:11311"  --env="ROS_HOSTNAME=localhost"  --env="DISPLAY=host.docker.internal:0.0"   --env="LIBGL_ALWAYS_INDIRECT=0" -v /tmp/.X11-unix:/tmp/.X11-unix teamdeimosiitmd/mars_rover:latest
 ```
 
 #Exec into the container
