@@ -20,15 +20,15 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: "Build Docker image for testing"
-        run: docker build -t robotronicsiitmandi/mars_rover_sim:latest .
+        run: docker build -t teamdeimosiitmd/mars_rover:latest .
 
       - name: "Debug: List available ROS packages"
         run: |
           echo "=== Checking container startup ==="
-          docker run --rm robotronicsiitmandi/mars_rover_sim:latest echo "Container started successfully"
+          docker run --rm teamdeimosiitmd/mars_rover:latest echo "Container started successfully"
           
           echo "=== Available ROS packages ==="
-          docker run --rm robotronicsiitmandi/mars_rover_sim:latest bash -c "rospack list"
+          docker run --rm teamdeimosiitmd/mars_rover:latest bash -c "rospack list"
   push-to-registry:
     needs: build-and-test
     runs-on: ubuntu-latest
@@ -47,7 +47,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: robotronicsiitmandi/mars_rover_sim
+          images: teamdeimosiitmd/mars_rover
       - name: "Build and push Docker image"
         uses: docker/build-push-action@v5
         with:
