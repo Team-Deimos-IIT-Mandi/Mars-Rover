@@ -1,0 +1,9 @@
+  <launch>
+  
+    <!-- Load URDF -->
+  <param
+    name="robot_description"
+    textfile="$(find rover_description)/urdf/rover_description.urdf" />
+   <node pkg="controller" name="control" type="control.py" output="screen"></node>
+   <include file="$(find rover_control)/launch/teleop.launch"/>
+</launch>

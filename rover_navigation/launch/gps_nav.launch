@@ -1,0 +1,13 @@
+<launch>
+
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_tranform_waypoint">
+      <remap from="/gps/fix" to="/gps/input"/>
+      <remap from="/odometry/filtered" to="/odometry/filtered/global"/>
+      <remap from="/odometry/gps" to="gps_point"/>
+      <remap from="/gps/filtered" to="/waypoint/gps"/>
+      <!-- <rosparam command="load" file="$(find rover_control)/config/navsat_transform.yaml" /> -->
+    </node>
+
+    <node pkg="rover_navigation" type="gps_to_pose.py" name="gps_waypoint_converter"/>
+    
+</launch>

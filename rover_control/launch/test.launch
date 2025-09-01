@@ -1,0 +1,10 @@
+<launch>
+
+    <param
+    name="robot_description"
+    textfile="$(find rover_description)/urdf/rover_description.urdf" />
+    
+    <include file="$(find rover_control)/launch/control.launch"/>
+
+
+</launch>
