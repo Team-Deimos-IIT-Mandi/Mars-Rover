@@ -1,8 +1,7 @@
 <launch>
   <arg name="visualOdom" default="true"/>
-  <param name="use_sim_time" value="true"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_house.world"/>
+    <arg name="world_name" value="$(find rover_description)/worlds/clearpath_playpen.world"/>
     <!-- change the world file based on the world you want to work with-->
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
@@ -25,7 +24,7 @@
     name="spawn_model"
     pkg="gazebo_ros"
     type="spawn_model"
-    args="-file $(find rover_description)/urdf/rover_description.urdf -urdf -model mars_rover -x 0 -y 0 -z 0"
+    args="-file $(find rover_description)/urdf/rover_description.urdf -urdf -model mars_rover"
     output="screen" />
   <node
     name="fake_joint_calibration"
