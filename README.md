@@ -102,7 +102,7 @@ roslaunch rover_description main.launch
 
 This launch file activates the full autonomous mission stack for URC-style navigation.
 
-### This launch fil have these features
+### This launch file have these features
 - GNSS parameter loading from `mission_params.yaml`
 - ArUco marker detection (`aruco_detector.py`)
 - Spiral search algorithm (`spiral_search.py`)
