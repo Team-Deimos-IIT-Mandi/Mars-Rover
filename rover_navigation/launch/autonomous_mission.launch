@@ -1,0 +1,12 @@
+<launch>
+  <rosparam file="$(find urc_nav)/config/mission_params.yaml" command="load"/>
+  <node pkg="urc_nav" type="gnss_navigator.py" name="gnss_navigator" output="screen"/>
+  <node pkg="urc_nav" type="aruco_detector.py" name="aruco_detector" output="screen"/>
+  <node pkg="urc_nav" type="object_recognizer.py" name="object_recognizer" output="screen"/>
+  <node pkg="urc_nav" type="led_controller.py" name="led_controller" output="screen"/>
+  <node pkg="urc_nav" type="abort_handler.py" name="abort_handler" output="screen"/>
+  <node pkg="urc_nav" type="mode_manager.py" name="mode_manager" output="screen"/>
+  <node pkg="urc_nav" type="status_publisher.py" name="status_publisher" output="screen"/>
+  <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen"/>
+  <node pkg="rviz" type="rviz" name="rviz" output="screen"/>
+</launch>
