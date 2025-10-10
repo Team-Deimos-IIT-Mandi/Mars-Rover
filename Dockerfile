@@ -61,14 +61,14 @@ RUN cd ${CATKIN_WS} && \
     rosdep install --from-paths src --ignore-src -r -y && \
     catkin build -j$(nproc)"
 
-# ========== Stage 6: Setup Next.js Web App ==========
-RUN mkdir -p ${MY_APP_DIR}
-COPY my-app/package*.json ${MY_APP_DIR}/
+# # ========== Stage 6: Setup Next.js Web App ==========
+# RUN mkdir -p ${MY_APP_DIR}
+# COPY my-app/package*.json ${MY_APP_DIR}/
 
-WORKDIR ${MY_APP_DIR}
-RUN npm ci --prefer-offline --no-audit --maxsockets 1
-COPY my-app ${MY_APP_DIR}
-RUN npm run build && npm prune --production
+# WORKDIR ${MY_APP_DIR}
+# RUN npm ci --prefer-offline --no-audit --maxsockets 1
+# COPY my-app ${MY_APP_DIR}
+# RUN npm run build && npm prune --production
 
 # ========== Stage 7: Environment Setup ==========
 RUN mkdir -p /root/.ros/log /root/.gazebo
