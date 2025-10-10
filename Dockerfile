@@ -4,11 +4,8 @@ FROM osrf/ros:noetic-desktop-full
 ENV DEBIAN_FRONTEND=noninteractive \
     ROS_DISTRO=noetic \
     CATKIN_WS=/root/catkin_ws \
-    MY_APP_DIR=/root/my-app \
-    NODE_VERSION=20 \
     LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8 \
-    NODE_OPTIONS=--max-old-space-size=2048
+    LC_ALL=C.UTF-8
 
 # ========== Stage 2: Install Dependencies ==========
 RUN apt-get update && apt-get install -y \
@@ -34,21 +31,14 @@ RUN apt-get update && apt-get install -y \
     libopencv-dev python3-opencv libatlas-base-dev libeigen3-dev libgoogle-glog-dev libsuitesparse-dev libboost-all-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# ========== Stage 3: Install Node.js ==========
-RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
-    apt-get install -y nodejs && \
-    npm install -g npm@latest && \
-    node --version && npm --version && \
-    rm -rf /var/lib/apt/lists/*
-
-# ========== Stage 4: Optional - Install Ceres Solver ==========
+# ========== Stage 3: Install Ceres Solver ==========
 ARG CERES_VERSION=1.14.0
 RUN git clone https://ceres-solver.googlesource.com/ceres-solver && \
     cd ceres-solver && git checkout tags/${CERES_VERSION} && \
     mkdir build && cd build && cmake .. && make -j$(nproc) install && \
     cd ../.. && rm -rf ceres-solver
 
-# ========== Stage 5: Setup ROS Workspace ==========
+# ========== Stage 4: Setup ROS Workspace ==========
 RUN rosdep init || true && rosdep update
 
 # Create the catkin workspace structure
@@ -65,16 +55,7 @@ RUN cd ${CATKIN_WS} && \
     rosdep install --from-paths src --ignore-src -r -y && \
     catkin build -j$(nproc)"
 
-# # ========== Stage 6: Setup Next.js Web App ==========
-# RUN mkdir -p ${MY_APP_DIR}
-# COPY my-app/package*.json ${MY_APP_DIR}/
-
-# WORKDIR ${MY_APP_DIR}
-# RUN npm ci --prefer-offline --no-audit --maxsockets 1
-# COPY my-app ${MY_APP_DIR}
-# RUN npm run build && npm prune --production
-
-# ========== Stage 7: Environment Setup ==========
+# ========== Stage 5: Environment Setup ==========
 RUN mkdir -p /root/.ros/log /root/.gazebo
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc && \
     echo "source ${CATKIN_WS}/devel/setup.bash" >> /root/.bashrc && \
@@ -83,7 +64,7 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc && \
     echo "export ROS_IP=127.0.0.1" >> /root/.bashrc && \
     echo "export GAZEBO_MODEL_PATH=${CATKIN_WS}/src/Mars-Rover/rover_description/models:/usr/share/gazebo-11/models" >> /root/.bashrc
 
-# ========== Stage 8: Entrypoint Script ==========
+# ========== Stage 6: Entrypoint Script ==========
 RUN echo '#!/bin/bash\n\
 set -e\n\
 source /opt/ros/${ROS_DISTRO}/setup.bash\n\
@@ -99,14 +80,12 @@ else\n\
   until rostopic list > /dev/null 2>&1; do sleep 1; done\n\
   roslaunch rosbridge_server rosbridge_websocket.launch port:=9090 &\n\
   ROSBRIDGE_PID=$!\n\
-  cd ${MY_APP_DIR} && npm start &\n\
-  NEXT_PID=$!\n\
-  trap \"kill $NEXT_PID $ROSBRIDGE_PID $ROSCORE_PID 2>/dev/null\" SIGTERM SIGINT\n\
-  echo "Web UI: http://localhost:3000 | ROS Bridge: ws://localhost:9090"\n\
+  trap "kill $ROSBRIDGE_PID $ROSCORE_PID 2>/dev/null" SIGTERM SIGINT\n\
+  echo "ROS Bridge: ws://localhost:9090 | ROS Master: http://localhost:11311"\n\
   wait\n\
 fi\n' > /entrypoint.sh && chmod +x /entrypoint.sh
 
-EXPOSE 3000 9090 11311
+EXPOSE 9090 11311
 WORKDIR /root
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["dev"]
