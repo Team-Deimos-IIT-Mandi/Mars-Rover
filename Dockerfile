@@ -51,9 +51,13 @@ RUN git clone https://ceres-solver.googlesource.com/ceres-solver && \
 # ========== Stage 5: Setup ROS Workspace ==========
 RUN rosdep init || true && rosdep update
 
+# Create the catkin workspace structure
 RUN mkdir -p ${CATKIN_WS}/src
-COPY catkin_ws/src ${CATKIN_WS}/src
 
+# Copy the entire Mars-Rover directory into the workspace
+COPY . ${CATKIN_WS}/src/Mars-Rover
+
+# Build the catkin workspace
 RUN cd ${CATKIN_WS} && \
     /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
     catkin init && catkin config --extend /opt/ros/${ROS_DISTRO} && \
