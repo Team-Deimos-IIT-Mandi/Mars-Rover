@@ -2,9 +2,9 @@ name: "Build, Test, and Deploy ROS Container"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main","jetson-docker" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main","jetson-docker" ]
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"
