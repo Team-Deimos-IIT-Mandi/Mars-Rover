@@ -98,3 +98,31 @@ To launch the rover in Gazebo along with Aruco markers, detect them, perform spi
 roslaunch rover_description main.launch
 ```
 
+##  Autonomous Mission Launch
+
+This launch file activates the full autonomous mission stack for URC-style navigation.
+
+### This launch file have these features
+- GNSS parameter loading from `mission_params.yaml`
+- ArUco marker detection (`aruco_detector.py`)
+- Spiral search algorithm (`spiral_search.py`)
+- PWM motor control (`pwm_driver.py`)
+- Four-wheel steering controller (`controller.launch`)
+- Teleop override (`teleop_node.py`)
+- RViz visualization
+
+### Run
+Make sure your ROS workspace is built and sourced:
+```bash
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+```
+
+then launch the mission
+
+```bash
+roslaunch rover_navigation autonomous_mission.launch
+```
+
+
