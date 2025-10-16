@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- CAN interface parameter -->
+  <arg name="can_interface" default="can0"/>
+  
+  <!-- Load controller configuration -->
+  <rosparam command="load" file="$(find mars_rover_hw)/config/controllers.yaml"/>
+  
+  <!-- Start hardware interface node -->
+  <node name="mars_rover_hw_node" pkg="mars_rover_hw" type="mars_rover_hw_node" output="screen">
+    <param name="can_interface" value="$(arg can_interface)"/>
+  </node>
+  
+  <!-- Load and start controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" 
+        respawn="false" output="screen"
+        args="joint_state_controller mars_rover_diff_drive_controller"/>
+  
+  <!-- Robot state publisher -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  
+</launch>
