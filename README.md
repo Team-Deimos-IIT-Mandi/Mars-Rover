@@ -98,3 +98,11 @@ To launch the rover in Gazebo along with Aruco markers, detect them, perform spi
 roslaunch rover_description main.launch
 ```
 
+## Single launch for navigation 
+
+```bash
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+roslaunch rover_navigation navigation.launch
+```

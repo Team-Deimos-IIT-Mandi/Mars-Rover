@@ -1,0 +1,2 @@
+VINS-Mono/ar_demo:VINS-Mono/benchmark_publisher:VINS-Mono/camera_model:VINS-Mono/data_generator:VINS-Mono/feature_tracker:VINS-Mono/pose_graph:VINS-Mono/vins_estimator:aruco_sim_rover:four_wheel_steering_controller:four_wheel_steering_msgs:marker_detection_rover:rover_control:rover_description:rover_navigation:smach_rover:swerve_steering_controller:urdf_geometry_parser:viso2/libviso2:viso2/viso2:viso2/viso2_ros
+-DCATKIN_DEVEL_PREFIX=/Mars-Rover/devel -DCMAKE_INSTALL_PREFIX=/Mars-Rover/install -G Unix Makefiles

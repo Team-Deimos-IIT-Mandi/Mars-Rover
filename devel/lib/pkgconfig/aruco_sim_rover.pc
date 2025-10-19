@@ -1,0 +1,8 @@
+prefix=/Mars-Rover/devel
+
+Name: aruco_sim_rover
+Description: Description of aruco_sim_rover
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
