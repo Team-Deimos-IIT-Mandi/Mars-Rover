@@ -1,0 +1,8 @@
+prefix=/Mars-Rover/install
+
+Name: rover_description
+Description: Description of rover_description
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

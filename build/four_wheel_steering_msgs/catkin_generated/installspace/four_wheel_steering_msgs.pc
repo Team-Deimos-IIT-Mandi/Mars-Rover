@@ -1,0 +1,8 @@
+prefix=/Mars-Rover/install
+
+Name: four_wheel_steering_msgs
+Description: Description of four_wheel_steering_msgs
+Version: 1.1.1
+Cflags: -I${prefix}/include -I/usr/include
+Libs: -L${prefix}/lib 
+Requires: message_runtime std_msgs

@@ -1,0 +1,8 @@
+prefix=/Mars-Rover/install
+
+Name: feature_tracker
+Description: Description of feature_tracker
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

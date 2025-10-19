@@ -1,0 +1,8 @@
+prefix=/Mars-Rover/devel
+
+Name: libviso2
+Description: Description of libviso2
+Version: 0.0.1
+Cflags: -I/Mars-Rover/src/viso2/libviso2/libviso2/src
+Libs: -L${prefix}/lib -lviso2
+Requires: 

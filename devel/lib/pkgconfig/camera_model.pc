@@ -1,0 +1,8 @@
+prefix=/Mars-Rover/devel
+
+Name: camera_model
+Description: Description of camera_model
+Version: 0.0.0
+Cflags: -I/Mars-Rover/src/VINS-Mono/camera_model/include
+Libs: -L${prefix}/lib -lcamera_model
+Requires: roscpp std_msgs
