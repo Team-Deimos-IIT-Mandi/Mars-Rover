@@ -23,4 +23,10 @@
     <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_kb" />
   </group>
 
+  <group if="$(arg keyboard)">
+    <node pkg="rover_control" type="teleop_mars_rover.py" name="teleop_mars_rover" output="screen">
+      <param name="cmd_vel_topic" value="/mars_rover/cmd_vel"/>
+    </node>
+  </group>
+
 </launch>

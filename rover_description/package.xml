@@ -1,22 +1,49 @@
+<?xml version="1.0"?>
 <package format="2">
   <name>rover_description</name>
   <version>1.0.0</version>
   <description>
-    <p>URDF Description package for mars rover</p>
-    <p>This package contains configuration data, 3D models and launch files
-for mars rover</p>
+    <p>URDF Description package for Mars Rover</p>
+    <p>This package contains configuration data, 3D models, and launch files for the Mars Rover.</p>
   </description>
+
   <author>TODO</author>
-  <maintainer email="TODO@email.com" />
+  <maintainer email="TODO@email.com">TODO</maintainer>
   <license>BSD</license>
+
+  <!-- Build tool -->
   <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Core ROS dependencies -->
   <depend>roslaunch</depend>
   <depend>robot_state_publisher</depend>
-  <depend>rviz</depend>
   <depend>joint_state_publisher_gui</depend>
-  <depend>gazebo</depend>
+  <depend>rviz</depend>
+
+  <!-- Simulation -->
+  <depend>gazebo_ros</depend>
+  <depend>gazebo_plugins</depend>
+
+  <!-- Sensors -->
   <depend>realsense2_description</depend>
+  <depend>joy</depend>
+
+  <!-- Motion and control -->
+  <depend>teleop_twist_joy</depend>
+  <depend>teleop_twist_keyboard</depend>
+  <depend>twist_mux</depend>
+  <depend>move_base</depend>
+
+  <!-- Localization -->
+  <depend>robot_localization</depend>
+
+  <!-- Visualization tools -->
+  <depend>interactive_marker_twist_server</depend>
+
+  <!-- Export Gazebo paths -->
   <export>
     <architecture_independent />
+    <gazebo_ros gazebo_model_path="${prefix}"/>
+    <gazebo_ros gazebo_media_path="${prefix}"/>
   </export>
 </package>
