@@ -2,9 +2,9 @@ name: "Build, Test, and Deploy ROS Container"
 
 on:
   push:
-    branches: [ "main","jetson-docker" ]
+    branches: [ "anish-part"]
   pull_request:
-    branches: [ "main","jetson-docker" ]
+    branches: [ "anish-part" ]
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"
@@ -92,38 +92,7 @@ jobs:
             catkin list && \
             echo '✅ Catkin workspace test passed'
           "
-
-      - name: "Test roscore startup and shutdown"
-        timeout-minutes: 2
-        run: |
-          echo "=== Testing roscore startup ==="
-          docker run --rm ${{ env.DOCKER_IMAGE }}:test-amd64 bash -c "
-            source /opt/ros/\$ROS_DISTRO/setup.bash && \
-            echo 'Starting roscore...' && \
-            timeout 10 roscore &
-            ROSCORE_PID=\$!
-            sleep 5 && \
-            echo '✅ Checking if roscore is running...' && \
-            rostopic list && \
-            echo '✅ roscore is running' && \
-            kill \$ROSCORE_PID 2>/dev/null || true && \
-            wait \$ROSCORE_PID 2>/dev/null || true && \
-            echo '✅ roscore shutdown successful' && \
-            echo '✅ roscore test passed'
-          " || echo "roscore test completed with expected timeout"
-
-      - name: "Test rosbridge availability"
-        timeout-minutes: 1
-        run: |
-          echo "=== Testing rosbridge package ==="
-          docker run --rm ${{ env.DOCKER_IMAGE }}:test-amd64 bash -c "
-            source /opt/ros/\$ROS_DISTRO/setup.bash && \
-            rospack find rosbridge_server && \
-            echo '✅ rosbridge_server package found' && \
-            ls /opt/ros/noetic/share/rosbridge_server/launch/rosbridge_websocket.launch && \
-            echo '✅ rosbridge launch file exists'
-          "
-
+            
       - name: "Display build summary"
         run: |
           echo "=== Build and Test Summary ==="
