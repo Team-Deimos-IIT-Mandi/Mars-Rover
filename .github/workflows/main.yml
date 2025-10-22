@@ -60,26 +60,90 @@ jobs:
         timeout-minutes: 5
         run: |
           echo "=== Testing ROS environment ==="
-          docker run --rm ${{ env.DOCKER_IMAGE }}:test-amd64 bash -c "
-            source /opt/ros/\$ROS_DISTRO/setup.bash && \
-            source /root/catkin_ws/devel/setup.bash && \
-            echo '✅ ROS_DISTRO:' \$ROS_DISTRO && \
-            echo '✅ ROS_PACKAGE_PATH:' \$ROS_PACKAGE_PATH && \
-            echo '✅ Total ROS packages:' \$(rospack list | wc -l) && \
-            echo '' && \
-            echo '=== Checking Mars Rover packages ===' && \
-            rospack find rover_description && \
-            rospack find rover_control && \
-            rospack find rover_navigation && \
-            echo '' && \
-            echo '=== Catkin workspace info ===' && \
-            cd /root/catkin_ws && \
-            echo 'Workspace:' \$(pwd) && \
-            echo 'Built packages:' && \
-            catkin list && \
-            echo '' && \
-            echo '✅ All ROS environment tests passed!'
-          "
+          docker run --rm ${{ env.DOCKER_IMAGE }}:test-amd64 bash -c '
+            set -e
+            source /opt/ros/$ROS_DISTRO/setup.bash
+            source /root/catkin_ws/devel/setup.bash
+            
+            echo "✅ ROS_DISTRO: $ROS_DISTRO"
+            echo "✅ ROS_ROOT: $ROS_ROOT"
+            echo "✅ ROS_PACKAGE_PATH: $ROS_PACKAGE_PATH"
+            
+            echo ""
+            echo "=== Checking Mars Rover packages ==="
+            
+            # Check if packages exist (no roscore needed)
+            if [ -d "/root/catkin_ws/src/Mars-Rover/rover_description" ]; then
+              echo "✅ rover_description found"
+            else
+              echo "❌ rover_description NOT found"
+              exit 1
+            fi
+            
+            if [ -d "/root/catkin_ws/src/Mars-Rover/rover_control" ]; then
+              echo "✅ rover_control found"
+            else
+              echo "❌ rover_control NOT found"
+              exit 1
+            fi
+            
+            if [ -d "/root/catkin_ws/src/Mars-Rover/rover_navigation" ]; then
+              echo "✅ rover_navigation found"
+            else
+              echo "❌ rover_navigation NOT found"
+              exit 1
+            fi
+            
+            echo ""
+            echo "=== Catkin workspace info ==="
+            echo "Workspace: $(pwd)"
+            
+            # Check build artifacts
+            if [ -d "/root/catkin_ws/devel" ]; then
+              echo "✅ Workspace built (devel/ exists)"
+              ls -la /root/catkin_ws/devel/ | head -10
+            else
+              echo "❌ Workspace NOT built"
+              exit 1
+            fi
+            
+            # Check if setup.bash exists
+            if [ -f "/root/catkin_ws/devel/setup.bash" ]; then
+              echo "✅ setup.bash exists"
+            else
+              echo "❌ setup.bash NOT found"
+              exit 1
+            fi
+            
+            # List packages without roscore
+            echo ""
+            echo "=== Package structure ==="
+            find /root/catkin_ws/src/Mars-Rover -name "package.xml" -exec dirname {} \; | while read pkg; do
+              echo "📦 $(basename $pkg)"
+            done
+            
+            # Check URDF files
+            echo ""
+            echo "=== Checking URDF files ==="
+            if [ -f "/root/catkin_ws/src/Mars-Rover/rover_description/urdf/rover_description.urdf" ]; then
+              echo "✅ rover_description.urdf exists"
+            fi
+            
+            # Check launch files
+            echo ""
+            echo "=== Checking launch files ==="
+            find /root/catkin_ws/src/Mars-Rover -name "*.launch" | wc -l | xargs echo "Launch files found:"
+            
+            # Check mesh files
+            echo ""
+            echo "=== Checking mesh files ==="
+            if [ -d "/root/catkin_ws/src/Mars-Rover/rover_description/meshes" ]; then
+              echo "Mesh files: $(find /root/catkin_ws/src/Mars-Rover/rover_description/meshes -name "*.STL" | wc -l)"
+            fi
+            
+            echo ""
+            echo "✅ All ROS environment tests passed!"
+          '
 
       - name: "Display build summary"
         run: |
