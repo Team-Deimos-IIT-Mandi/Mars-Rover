@@ -2,9 +2,9 @@ name: "Build, Test, and Deploy ROS Container"
 
 on:
   push:
-    branches: [ "anish-part"]
+    branches: [ "main", "anish-part" ]
   pull_request:
-    branches: [ "anish-part" ]
+    branches: [ "main", "anish-part" ]
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"
@@ -105,7 +105,10 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     timeout-minutes: 180
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Push on main branch OR when manually triggered
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'workflow_dispatch'
     
     steps:
       - name: "Checkout repository code"
@@ -176,6 +179,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Repository:** \`${{ env.DOCKER_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Platforms:** \`${{ env.PLATFORMS }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Tags:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
