@@ -60,7 +60,7 @@ jobs:
         timeout-minutes: 5
         run: |
           echo "=== Testing ROS environment ==="
-          docker run --rm ${{ env.DOCKER_IMAGE }}:test-amd64 bash -c '
+          docker run --rm --entrypoint bash ${{ env.DOCKER_IMAGE }}:test-amd64 -c '
             set -e
             source /opt/ros/$ROS_DISTRO/setup.bash
             source /root/catkin_ws/devel/setup.bash
