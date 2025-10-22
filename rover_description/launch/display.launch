@@ -1,14 +1,69 @@
 <launch>
-  <arg
-    name="model" />
-  <param
-    name="robot_description"
-    textfile="$(find rover_description)/urdf/rover_description.urdf" />
+  <!-- Arguments -->
+  <arg name="world_name" default="$(find rover_description)/worlds/terrain.world"/>
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="verbose" default="true"/>
+  <!-- Set use_sim_time parameter -->
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+
+<env name="GAZEBO_MODEL_DATABASE_URI" value=""/>
+  <!-- Set Gazebo environment variables for mesh loading -->
+  <env name="GAZEBO_MODEL_PATH" value="$(find rover_description)/..:$(find rover_description):$(optenv GAZEBO_MODEL_PATH)"/>
+  <!-- <env name="GAZEBO_RESOURCE_PATH" value="$(find rover_description):$(optenv GAZEBO_RESOURCE_PATH)"/> -->
+<env name="GAZEBO_RESOURCE_PATH" value="$(find rover_description)/..:$(find rover_description):$(optenv GAZEBO_RESOURCE_PATH)"/>
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <param name="robot_description" 
+         textfile="$(find rover_description)/urdf/rover_description.urdf" />
+
+  <!-- Launch Gazebo with world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+  </include>
+
+  <!-- Spawn the robot model in Gazebo -->
+  <node name="spawn_urdf" 
+        pkg="gazebo_ros" 
+        type="spawn_model" 
+        args="-param robot_description -urdf -model mars_rover -z 0.5"
+        output="screen"
+        respawn="false" />
+
+  <!-- Start robot_state_publisher (publishes TF transforms) -->
+  <node name="robot_state_publisher" 
+        pkg="robot_state_publisher" 
+        type="robot_state_publisher"
+        respawn="false"
+        output="screen">
+    <param name="publish_frequency" value="50.0"/>
+  </node>
   
- 
-  <node
-    name="rviz"
-    pkg="rviz"
-    type="rviz"
-    args="-d $(find rover_description)/rviz/rviz_image.rviz" />
+  <!-- Start joint_state_publisher -->
+  <node name="joint_state_publisher" 
+        pkg="joint_state_publisher" 
+        type="joint_state_publisher"
+        respawn="false"
+        output="screen" />
+
+  <!-- Fake joint calibration -->
+  <node name="fake_joint_calibration"
+        pkg="rostopic"
+        type="rostopic"
+        args="pub /calibrated std_msgs/Bool true -r 10" />
+  
+  <!-- RViz (optional, launch separately if needed) -->
+  <node name="rviz" 
+        pkg="rviz" 
+        type="rviz" 
+        args="-d $(find rover_description)/rviz/rviz_image.rviz" 
+        required="false" />
 </launch>

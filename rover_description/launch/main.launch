@@ -1,5 +1,5 @@
 <launch>
-  <arg name="visualOdom" default="true"/>
+  <!-- <arg name="visualOdom" default="true"/> -->
   <param name="use_sim_time" value="true"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find rover_description)/worlds/clearpath_playpen.world"/>
@@ -10,7 +10,7 @@
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>
-    <node pkg="marker_detection_rover" type="find_between.py" name="find_between" output="screen">
+    <!-- <node pkg="marker_detection_rover" type="find_between.py" name="find_between" output="screen">
         
     </node>
     <node pkg="marker_detection_rover" type="find_between_1.py" name="find_between_1" output="screen">
@@ -19,7 +19,7 @@
 
     <node pkg="marker_detection_rover" type="find_between_2.py" name="find_between_2" output="screen">
       
-    </node>
+    </node> -->
     
   <node
     name="spawn_model"
