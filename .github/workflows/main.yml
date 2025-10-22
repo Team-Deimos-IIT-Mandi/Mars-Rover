@@ -56,15 +56,8 @@ jobs:
             --progress=plain \
             .
 
-      - name: "Test container startup"
-        timeout-minutes: 2
-        run: |
-          echo "=== Testing container basic startup ==="
-          docker run --rm ${{ env.DOCKER_IMAGE }}:test-amd64 bash -c "echo 'Container started successfully'"
-          echo "✅ Container startup test passed"
-
-      - name: "Test ROS environment"
-        timeout-minutes: 2
+      - name: "Test ROS environment and packages"
+        timeout-minutes: 5
         run: |
           echo "=== Testing ROS environment ==="
           docker run --rm ${{ env.DOCKER_IMAGE }}:test-amd64 bash -c "
@@ -73,26 +66,21 @@ jobs:
             echo '✅ ROS_DISTRO:' \$ROS_DISTRO && \
             echo '✅ ROS_PACKAGE_PATH:' \$ROS_PACKAGE_PATH && \
             echo '✅ Total ROS packages:' \$(rospack list | wc -l) && \
-            echo '✅ Checking Mars Rover packages...' && \
+            echo '' && \
+            echo '=== Checking Mars Rover packages ===' && \
             rospack find rover_description && \
             rospack find rover_control && \
-            echo '✅ ROS environment test passed'
+            rospack find rover_navigation && \
+            echo '' && \
+            echo '=== Catkin workspace info ===' && \
+            cd /root/catkin_ws && \
+            echo 'Workspace:' \$(pwd) && \
+            echo 'Built packages:' && \
+            catkin list && \
+            echo '' && \
+            echo '✅ All ROS environment tests passed!'
           "
 
-      - name: "Test catkin workspace build"
-        timeout-minutes: 2
-        run: |
-          echo "=== Testing catkin workspace ==="
-          docker run --rm ${{ env.DOCKER_IMAGE }}:test-amd64 bash -c "
-            source /opt/ros/\$ROS_DISTRO/setup.bash && \
-            source /root/catkin_ws/devel/setup.bash && \
-            cd /root/catkin_ws && \
-            echo '✅ Catkin workspace location:' \$(pwd) && \
-            echo '✅ Built packages:' && \
-            catkin list && \
-            echo '✅ Catkin workspace test passed'
-          "
-            
       - name: "Display build summary"
         run: |
           echo "=== Build and Test Summary ==="
@@ -105,9 +93,9 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     timeout-minutes: 180
-    # Push on main branch OR when manually triggered
+    # Push on main OR anish-part branches, or when manually triggered
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/anish-part')) ||
       github.event_name == 'workflow_dispatch'
     
     steps:
@@ -154,8 +142,9 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=jetson-nano,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=jetson-nano,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=dev-latest,enable=${{ github.ref == 'refs/heads/anish-part' }}
             type=sha,prefix={{branch}}-
 
       - name: "Build and push multi-arch image"
@@ -188,26 +177,47 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Pull Commands" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**For Jetson Nano (ARM64):**" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ env.DOCKER_IMAGE }}:jetson-nano" >> $GITHUB_STEP_SUMMARY
-          echo "docker run -it --runtime nvidia --privileged --network host \\" >> $GITHUB_STEP_SUMMARY
-          echo "  ${{ env.DOCKER_IMAGE }}:jetson-nano" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**For x86_64:**" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ env.DOCKER_IMAGE }}:latest" >> $GITHUB_STEP_SUMMARY
-          echo "docker run -it --privileged --network host \\" >> $GITHUB_STEP_SUMMARY
-          echo "  ${{ env.DOCKER_IMAGE }}:latest" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "**For Jetson Nano (ARM64):**" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull ${{ env.DOCKER_IMAGE }}:jetson-nano" >> $GITHUB_STEP_SUMMARY
+            echo "docker run -it --runtime nvidia --privileged --network host \\" >> $GITHUB_STEP_SUMMARY
+            echo "  ${{ env.DOCKER_IMAGE }}:jetson-nano" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**For x86_64:**" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull ${{ env.DOCKER_IMAGE }}:latest" >> $GITHUB_STEP_SUMMARY
+            echo "docker run -it --privileged --network host \\" >> $GITHUB_STEP_SUMMARY
+            echo "  ${{ env.DOCKER_IMAGE }}:latest" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ github.ref }}" == "refs/heads/anish-part" ]]; then
+            echo "**Development Build (anish-part branch):**" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull ${{ env.DOCKER_IMAGE }}:dev-latest" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull ${{ env.DOCKER_IMAGE }}:anish-part" >> $GITHUB_STEP_SUMMARY
+            echo "docker run -it --privileged --network host \\" >> $GITHUB_STEP_SUMMARY
+            echo "  ${{ env.DOCKER_IMAGE }}:dev-latest" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Note:** This is a development build from the anish-part branch." >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ Build completed successfully!" >> $GITHUB_STEP_SUMMARY
 
       - name: "Verify pushed images"
         run: |
           echo "=== Verifying pushed images ==="
-          docker buildx imagetools inspect ${{ env.DOCKER_IMAGE }}:latest
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker buildx imagetools inspect ${{ env.DOCKER_IMAGE }}:latest
+          elif [[ "${{ github.ref }}" == "refs/heads/anish-part" ]]; then
+            docker buildx imagetools inspect ${{ env.DOCKER_IMAGE }}:dev-latest
+          fi
           echo ""
-          echo "=== Image details ==="
-          docker buildx imagetools inspect ${{ env.DOCKER_IMAGE }}:latest --raw | jq '.'
+          echo "=== All tags for this build ==="
+          echo "${{ steps.meta.outputs.tags }}" | while read tag; do
+            echo "Inspecting: $tag"
+            docker buildx imagetools inspect "$tag" --raw | jq -r '.manifests[].platform | "\(.os)/\(.architecture)"' || true
+          done
