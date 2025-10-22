@@ -67,6 +67,10 @@ RUN mkdir -p ${CATKIN_WS}/src
 
 COPY . ${CATKIN_WS}/src/Mars-Rover
 
+# Add custom rosdep sources for additional packages
+RUN echo "yaml file://${CATKIN_WS}/src/Mars-Rover/rosdep.yaml" > /etc/ros/rosdep/sources.list.d/50-mars-rover.list && \
+    rosdep update
+
 # Build the catkin workspace (with ARM64 optimizations)
 RUN cd ${CATKIN_WS} && \
     /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
