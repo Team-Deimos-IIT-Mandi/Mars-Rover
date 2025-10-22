@@ -4,7 +4,7 @@
     publish_rate: 50
 
   mars_rover:
-    type        : "four_wheel_steering_controller/FourWheelSteeringController"
+    type     : "swerve_steering_controller/SwerveSteeringController"
     front_wheel: ['wheel_4', 'wheel_3']
     rear_wheel: ['wheel_1', 'wheel_2']
     front_steering: ['steer4', 'steer_3']
