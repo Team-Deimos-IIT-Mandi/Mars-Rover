@@ -23,6 +23,8 @@
   <exec_depend>base_local_planner</exec_depend>
   <exec_depend>dwa_local_planner</exec_depend>
   <exec_depend>spatio_temporal_voxel_layer</exec_depend>
+  <exec_depend>robot_localization</exec_depend>
+  <exec_depend>slam_toolbox</exec_depend>
 
   <export>
   </export>

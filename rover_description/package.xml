@@ -17,8 +17,10 @@
   <!-- Core ROS dependencies -->
   <depend>roslaunch</depend>
   <depend>robot_state_publisher</depend>
+  <depend>joint_state_publisher</depend>
   <depend>joint_state_publisher_gui</depend>
   <depend>rviz</depend>
+  <depend>rostopic</depend>
 
   <!-- Simulation -->
   <depend>gazebo_ros</depend>
@@ -39,6 +41,13 @@
 
   <!-- Visualization tools -->
   <depend>interactive_marker_twist_server</depend>
+
+  <!-- Other packages -->
+  <depend>rover_control</depend>
+  <depend>rover_navigation</depend>
+  <depend>aruco_sim_rover</depend>
+  <depend>marker_detection_rover</depend>
+  <depend>viso2_ros</depend>
 
   <!-- Export Gazebo paths -->
   <export>
