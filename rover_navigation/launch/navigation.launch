@@ -1,40 +1,59 @@
 <launch>
-  <!-- Load robot description -->
-  <param name="robot_description" command="$(find xacro)/xacro '$(find rover_description)/urdf/rover_description.urdf'">
+  <!-- Simulation Time -->
+  <param name="use_sim_time" value="true"/>
 
-  <!-- Start Gazebo simulation -->
+  <!-- Load Robot Description -->
+  <param name="robot_description" textfile="$(find rover_description)/urdf/rover_description.urdf"/>
+
+  <!-- Start Gazebo with Custom World -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rover_description)/worlds/clearpath_playpen.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
   </include>
 
-  <!-- Spawn the robot model into Gazebo -->
+  <!-- Spawn Rover Model -->
   <node name="spawn_rover" pkg="gazebo_ros" type="spawn_model" output="screen"
-        args="-urdf -param robot_description -model rover -x 0 -y 0 -z 0.2" />
+        args="-urdf -param robot_description -model mars_rover -x 0 -y 0 -z 0.2" />
 
-  <!-- Robot State Publisher -->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <!-- Publish Joint States to TF -->
+  <node name="$(anon robot_state_publisher)" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
 
-  <!-- Joint State Publisher -->
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <!-- Static Transform: map → odom -->
+  <node pkg="tf" type="static_transform_publisher" name="map_to_odom"
+        args="0 0 0 0 0 0 map odom 100"/>
 
-  <!-- EKF Localization Node (from rover_control) -->
-  <node name="ekf_localization_local" pkg="robot_localization" type="ekf_localization_node" output="screen">
-    <rosparam command="load" file="$(find rover_control)/config/localization.yaml" />
-  </node>
+  <!-- Marker Detection Nodes -->
+  <node pkg="marker_detection_rover" type="find_between.py" name="find_between" output="screen"/>
+  <node pkg="marker_detection_rover" type="find_between_1.py" name="find_between_1" output="screen"/>
+  <node pkg="marker_detection_rover" type="find_between_2.py" name="find_between_2" output="screen"/>
 
-   <!-- Static transform from map to odom -->
-  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom"
-        args="0 0 0 0 0 0 map odom" />
+  <!-- ArUco Marker Spawner -->
+  <include file="$(find aruco_sim_rover)/launch/arucoSpawner.launch">
+    <arg name="x" value="4"/>
+    <arg name="y" value="2"/>
+    <arg name="model_file" value="arucoMarker0.dae"/>
+  </include>
 
-  <!-- Move Base Node -->
-  <node name="move_base" pkg="move_base" type="move_base" output="screen">
-    <rosparam file="$(find rover_control)/config/pid.yaml" command="load" />
-    <rosparam file="$(find rover_navigation)/config/costmap_global_laser.yaml" command="load" />
-    <rosparam file="$(find rover_navigation)/config/costmap_local.yaml" command="load" />
-    <rosparam file="$(find rover_navigation)/config/planner.yaml" command="load" />
-  </node>
+  <!-- Fake Joint Calibration -->
+  <node name="fake_joint_calibration" pkg="rostopic" type="rostopic"
+        args="pub /calibrated std_msgs/Bool true"/>
 
-  <!-- RViz -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rover_navigation)/config/rover_nav.rviz" />
+  <!-- Control and Teleop -->
+  <include file="$(find rover_control)/launch/control.launch"/>
+  <include file="$(find rover_control)/launch/teleop.launch"/>
+
+  <!-- Navigation Stack (Costmap-based, no SLAM) -->
+  <include file="$(find rover_navigation)/launch/move_base_mapless_demo.launch"/>
+
+  <!-- RViz Visualization -->
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find rover_navigation)/config/rover_nav.rviz"/>
+
+  <!-- Optional: Visual Odometry -->
+  <!--<arg name="visualOdom" default="true"/>
+  <include file="$(find viso2_ros)/launch/demo.launch" if="$(arg visualOdom)"/>-->
 </launch>
