@@ -98,3 +98,238 @@ To launch the rover in Gazebo along with Aruco markers, detect them, perform spi
 roslaunch rover_description main.launch
 ```
 
+
+
+# 🚀 Mars Rover - Jetson Nano Deployment Guide
+
+## Prerequisites on Jetson Nano
+
+1. **Install Docker** (if not already installed):
+```bash
+# Install Docker
+sudo apt-get update
+sudo apt-get install -y docker.io
+
+# Add your user to docker group
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Enable Docker service
+sudo systemctl enable docker
+sudo systemctl start docker
+```
+
+2. **Verify Docker is working**:
+```bash
+docker --version
+docker run hello-world
+```
+
+---
+
+## 🎯 Quick Start (Pull and Run)
+
+### For Production (Main Branch):
+```bash
+# Pull the latest Jetson Nano optimized image
+docker pull teamdeimosiitmd/mars_rover:jetson-nano
+
+# Run in development mode (interactive shell)
+docker run -it --rm \
+  --runtime nvidia \
+  --privileged \
+  --network host \
+  -v /dev:/dev \
+  --name mars_rover \
+  teamdeimosiitmd/mars_rover:jetson-nano
+
+# Inside the container, you can run:
+roslaunch rover_description display.launch
+roslaunch rover_gazebo rover_world.launch
+```
+
+### For Development (Anish-Part Branch):
+```bash
+docker pull teamdeimosiitmd/mars_rover:dev-latest
+
+docker run -it --rm \
+  --runtime nvidia \
+  --privileged \
+  --network host \
+  -v /dev:/dev \
+  --name mars_rover_dev \
+  teamdeimosiitmd/mars_rover:dev-latest
+```
+
+---
+
+## 🔧 Running Modes
+
+### Mode 1: Development Shell (Default)
+```bash
+docker run -it --rm \
+  --runtime nvidia \
+  --privileged \
+  --network host \
+  teamdeimosiitmd/mars_rover:jetson-nano
+```
+
+### Mode 2: ROS Core + ROSBridge (for web interfaces)
+```bash
+docker run -it --rm \
+  --runtime nvidia \
+  --privileged \
+  --network host \
+  teamdeimosiitmd/mars_rover:jetson-nano roscore
+```
+
+---
+
+## 🛠️ Persistent Container (Recommended for Development)
+
+If you want to keep your changes and data:
+
+```bash
+# Create and run a named container
+docker run -it \
+  --runtime nvidia \
+  --privileged \
+  --network host \
+  -v /dev:/dev \
+  -v ~/mars_rover_data:/root/data \
+  --name mars_rover_persistent \
+  teamdeimosiitmd/mars_rover:jetson-nano
+
+# Stop the container
+docker stop mars_rover_persistent
+
+# Restart the container later
+docker start -i mars_rover_persistent
+
+# Remove when done
+docker rm mars_rover_persistent
+```
+
+---
+
+## 📦 Common ROS Commands Inside Container
+
+```bash
+# List all ROS topics
+rostopic list
+
+# View rover in RViz
+roslaunch rover_description display.launch
+
+# Check ROS environment
+rospack list | grep rover
+rosnode list
+```
+
+---
+
+## 🔍 Troubleshooting
+
+### Issue: "docker: Error response from daemon: could not select device driver"
+**Solution**: NVIDIA runtime not installed. Run:
+```bash
+# Install nvidia-docker2
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | \
+  sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+sudo apt-get update
+sudo apt-get install -y nvidia-docker2
+sudo systemctl restart docker
+```
+
+### Issue: Permission denied for /dev devices
+**Solution**: Use `--privileged` flag or specific device mapping:
+```bash
+docker run -it --rm \
+  --device=/dev/ttyUSB0 \
+  --device=/dev/video0 \
+  teamdeimosiitmd/mars_rover:jetson-nano
+```
+
+### Issue: Out of memory during runtime
+**Solution**: Close unnecessary applications and use memory limit:
+```bash
+docker run -it --rm \
+  --runtime nvidia \
+  --memory="3g" \
+  --memory-swap="4g" \
+  teamdeimosiitmd/mars_rover:jetson-nano
+```
+
+### Issue: Display not working in container
+**Solution**: Allow X11 forwarding:
+```bash
+xhost +local:docker
+
+docker run -it --rm \
+  --runtime nvidia \
+  --privileged \
+  --network host \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  teamdeimosiitmd/mars_rover:jetson-nano
+```
+
+---
+
+## 🚀 Performance Tips for Jetson Nano
+
+1. **Enable maximum performance mode**:
+```bash
+sudo nvpmodel -m 0  # 10W mode (max performance)
+sudo jetson_clocks   # Max out CPU/GPU clocks
+```
+
+2. **Monitor system resources**:
+```bash
+# On Jetson Nano (outside container)
+jtop  # If installed
+htop
+```
+
+3. **Reduce memory usage**:
+- Close GUI applications when not needed
+- Use `catkin build` with `--mem-limit 80%` (already configured in Dockerfile)
+- Disable swap if causing slowdowns
+
+---
+
+## 🔄 Updating to Latest Image
+
+```bash
+# Pull latest version
+docker pull teamdeimosiitmd/mars_rover:jetson-nano
+
+# Remove old containers
+docker stop mars_rover
+docker rm mars_rover
+
+# Run new version
+docker run -it --runtime nvidia --privileged --network host \
+  teamdeimosiitmd/mars_rover:jetson-nano
+```
+
+---
+
+## 📊 Image Information
+
+- **Base Image**: `osrf/ros:noetic-desktop-full`
+- **ROS Version**: Noetic
+- **Architectures**: AMD64, ARM64 (Jetson Nano optimized)
+- **Compiler Optimizations**: `-march=armv8-a -mtune=cortex-a57 -O3`
+- **Pre-installed Packages**: Navigation, SLAM, Gazebo, RViz, ROSBridge
+
+---
+
+## 🆘 Need Help?
+
+- Check container logs: `docker logs mars_rover`
+- Access running container: `docker exec -it mars_rover bash`
+- Inspect image: `docker inspect teamdeimosiitmd/mars_rover:jetson-nano`
