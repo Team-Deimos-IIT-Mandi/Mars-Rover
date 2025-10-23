@@ -53,9 +53,49 @@ pip install opencv-contrib-python==4.2.0.32
 
 - **urdf_geometry_parser** : Include scripts that help in parsing and extracting geometric information from the URDF files.
 
-##Using Pre-built Docker Image
+## Building from Source (without Docker)
 
-#Requirements
+If you want to build the project from source instead of using Docker:
+
+### 1. Install ROS Noetic
+Follow the official ROS Noetic installation guide: [http://wiki.ros.org/noetic/Installation/Ubuntu](http://wiki.ros.org/noetic/Installation/Ubuntu)
+
+### 2. Create a Catkin Workspace
+```bash
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/src
+```
+
+### 3. Clone the Repository
+```bash
+git clone https://github.com/Team-Deimos-IIT-Mandi/Mars-Rover.git
+cd ~/catkin_ws
+```
+
+### 4. Install Dependencies using rosdep
+```bash
+# Initialize rosdep if not already done
+sudo rosdep init
+rosdep update
+
+# Add custom rosdep source for Mars Rover dependencies
+echo "yaml file://$(pwd)/src/Mars-Rover/rosdep.yaml" | sudo tee /etc/ros/rosdep/sources.list.d/50-mars-rover.list
+rosdep update
+
+# Install all dependencies
+rosdep install --from-paths src --ignore-src -r -y
+```
+
+### 5. Build the Workspace
+```bash
+cd ~/catkin_ws
+catkin build  # or catkin_make
+source devel/setup.bash
+```
+
+## Using Pre-built Docker Image
+
+### Requirements
 
 Before running the simulation, install:
 1. Docker
