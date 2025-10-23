@@ -1,4 +1,4 @@
-# ========== Jetson Nano Optimized ROS Noetic Docker Image ==========
+# ========== Multi-Architecture Build for AMD64 and ARM64 (Jetson Nano) ==========
 FROM osrf/ros:noetic-desktop-full
 
 ARG TARGETPLATFORM
@@ -53,22 +53,15 @@ RUN mkdir -p ${CATKIN_WS}/src
 
 COPY . ${CATKIN_WS}/src/Mars-Rover
 
-# ========== Build Catkin Workspace with Platform Optimizations ==========
+# ========== Build Catkin Workspace (No Architecture-Specific Flags for Cross-Compilation) ==========
 RUN cd ${CATKIN_WS} && \
     /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
     catkin init && \
     catkin config --extend /opt/ros/${ROS_DISTRO} && \
-    if [ \"$TARGETARCH\" = \"arm64\" ]; then \
-        echo '=== Building for Jetson Nano (ARM64) with optimizations ===' && \
-        catkin config --cmake-args \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_FLAGS=\"-march=armv8-a -mtune=cortex-a57 -O3 -DNDEBUG\" \
-            -DCMAKE_C_FLAGS=\"-march=armv8-a -mtune=cortex-a57 -O3 -DNDEBUG\"; \
-    else \
-        echo '=== Building for AMD64 ===' && \
-        catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release; \
-    fi && \
-    rosdep install --from-paths src --ignore-src -r -y && \
+    catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release && \
+    echo '=== Installing rosdep dependencies ===' && \
+    rosdep install --from-paths src --ignore-src -r -y || true && \
+    echo '=== Building workspace for ${TARGETARCH} ===' && \
     catkin build -j\$(nproc) --mem-limit 80% && \
     echo '=== Cleaning up build artifacts ===' && \
     rm -rf build logs .catkin_tools"
@@ -76,7 +69,7 @@ RUN cd ${CATKIN_WS} && \
 # ========== Environment Setup ==========
 RUN mkdir -p /root/.ros/log /root/.gazebo
 
-# Setup environment variables
+# Setup environment variables (with ARM optimizations for runtime, not compile time)
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc && \
     echo "source ${CATKIN_WS}/devel/setup.bash" >> /root/.bashrc && \
     echo "export ROS_MASTER_URI=http://localhost:11311" >> /root/.bashrc && \
@@ -84,7 +77,7 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc && \
     echo "export ROS_IP=127.0.0.1" >> /root/.bashrc && \
     echo "export GAZEBO_MODEL_PATH=${CATKIN_WS}/src/Mars-Rover/rover_description/models:/usr/share/gazebo-11/models" >> /root/.bashrc && \
     if [ "$TARGETARCH" = "arm64" ]; then \
-        echo "# Jetson Nano ARM64 optimizations" >> /root/.bashrc && \
+        echo "# Jetson Nano ARM64 runtime optimizations" >> /root/.bashrc && \
         echo "export OPENBLAS_CORETYPE=ARMV8" >> /root/.bashrc && \
         echo "export OPENBLAS_NUM_THREADS=4" >> /root/.bashrc && \
         echo "export OMP_NUM_THREADS=4" >> /root/.bashrc; \
