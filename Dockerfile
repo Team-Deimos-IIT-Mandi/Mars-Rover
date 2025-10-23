@@ -1,5 +1,5 @@
 # ========== Multi-Architecture Build for AMD64 and ARM64 (Jetson Nano) ==========
-FROM --platform=$TARGETPLATFORM osrf/ros:noetic-desktop-full
+FROM osrf/ros:noetic-desktop-full
 
 # Build arguments for multi-arch support
 ARG TARGETPLATFORM
@@ -42,12 +42,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# ========== Stage 3: Install Ceres Solver (optimized for ARM64) ==========
+# ========== Stage 3: Install Ceres Solver (FIXED VERSION) ==========
 ARG CERES_VERSION=1.14.0
-RUN git clone --depth 1 --branch ${CERES_VERSION} https://ceres-solver.googlesource.com/ceres-solver && \
+RUN set -e && \
+    echo "Installing Ceres Solver ${CERES_VERSION} for ${TARGETARCH}" && \
+    # Clone without --depth to avoid tag issues
+    git clone https://ceres-solver.googlesource.com/ceres-solver && \
     cd ceres-solver && \
+    git checkout ${CERES_VERSION} && \
     mkdir build && cd build && \
     if [ "$TARGETARCH" = "arm64" ]; then \
+        echo "Configuring for ARM64 (Jetson Nano)..." && \
         cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_EXAMPLES=OFF \
@@ -55,10 +60,14 @@ RUN git clone --depth 1 --branch ${CERES_VERSION} https://ceres-solver.googlesou
             -DCMAKE_CXX_FLAGS="-march=armv8-a -mtune=cortex-a57" \
             -DEIGEN_INCLUDE_DIR_HINTS=/usr/include/eigen3; \
     else \
+        echo "Configuring for AMD64..." && \
         cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF; \
     fi && \
+    echo "Building Ceres Solver..." && \
     make -j$(nproc) install && \
-    cd ../.. && rm -rf ceres-solver
+    echo "Cleaning up..." && \
+    cd ../.. && rm -rf ceres-solver && \
+    echo "Ceres Solver installation complete"
 
 # ========== Stage 4: Setup ROS Workspace ==========
 RUN rosdep init || true && rosdep update
