@@ -1,0 +1,10 @@
+gazebo_ros_control:
+  pid_gains:
+    wheel_1: {p: 100.0, i: 0.01, d: 10.0}
+    wheel_2: {p: 100.0, i: 0.01, d: 10.0}
+    wheel_3: {p: 100.0, i: 0.01, d: 10.0}
+    wheel_4: {p: 100.0, i: 0.01, d: 10.0}
+    steer1:  {p: 50.0, i: 0.01, d: 5.0}
+    steer2:  {p: 50.0, i: 0.01, d: 5.0}
+    steer_3: {p: 50.0, i: 0.01, d: 5.0}
+    steer4:  {p: 50.0, i: 0.01, d: 5.0}
