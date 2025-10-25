@@ -24,46 +24,63 @@ RUN echo "Building for platform: $TARGETPLATFORM (arch: $TARGETARCH)" && \
     echo "Building on platform: $BUILDPLATFORM" && \
     uname -m
 
-# ========== Install System Dependencies ==========
+# ========== Install System Dependencies (Staged for Memory Efficiency) ==========
+# Stage 1: Build tools and Python
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Build tools
     build-essential cmake git wget curl gnupg2 lsb-release software-properties-common \
-    # Python / ROS tools
     python3-pip python3-dev python3-catkin-tools python3-rosdep python3-psutil \
     python3-rosinstall python3-rosinstall-generator python3-wstool \
-    # Core ROS packages
+    nano vim htop net-tools iputils-ping ca-certificates \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Stage 2: Core ROS packages (split for ARM64 memory constraints)
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-rosbridge-suite \
     ros-${ROS_DISTRO}-tf ros-${ROS_DISTRO}-tf2 ros-${ROS_DISTRO}-message-filters \
-    ros-${ROS_DISTRO}-joint-state-publisher-gui ros-${ROS_DISTRO}-robot-state-publisher \
+    ros-${ROS_DISTRO}-joint-state-publisher ros-${ROS_DISTRO}-robot-state-publisher \
     ros-${ROS_DISTRO}-teleop-twist-keyboard ros-${ROS_DISTRO}-teleop-twist-joy \
     ros-${ROS_DISTRO}-cv-bridge ros-${ROS_DISTRO}-image-transport \
-    ros-${ROS_DISTRO}-vision-opencv ros-${ROS_DISTRO}-xacro ros-${ROS_DISTRO}-rviz \
+    ros-${ROS_DISTRO}-xacro \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Stage 3: Navigation and control packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-gmapping ros-${ROS_DISTRO}-move-base ros-${ROS_DISTRO}-map-server \
     ros-${ROS_DISTRO}-amcl ros-${ROS_DISTRO}-navigation \
-    ros-${ROS_DISTRO}-robot-localization \
-    ros-${ROS_DISTRO}-interactive-marker-twist-server \
-    ros-${ROS_DISTRO}-twist-mux \
-    ros-${ROS_DISTRO}-controller-manager \
-    ros-${ROS_DISTRO}-realtime-tools \
+    ros-${ROS_DISTRO}-controller-manager ros-${ROS_DISTRO}-ros-control ros-${ROS_DISTRO}-ros-controllers \
+    ros-${ROS_DISTRO}-realtime-tools ros-${ROS_DISTRO}-twist-mux \
     ros-${ROS_DISTRO}-smach ros-${ROS_DISTRO}-smach-ros \
-    ros-${ROS_DISTRO}-spatio-temporal-voxel-layer \
-    # System tools
-    nano vim htop net-tools iputils-ping ca-certificates \
-    # OpenCV and math libs
-    libopencv-dev python3-opencv libatlas-base-dev libeigen3-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Stage 4: Vision and perception (heavy packages)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libopencv-dev python3-opencv \
+    libpcl-dev ros-${ROS_DISTRO}-pcl-ros \
+    libatlas-base-dev libeigen3-dev \
     libgoogle-glog-dev libsuitesparse-dev libboost-all-dev \
-    libceres-dev libpcl-dev pcl-tools \
-    # Conditionally install Gazebo only for AMD64 (skip for Jetson)
-    $(if [ "$TARGETARCH" = "amd64" ]; then echo "ros-${ROS_DISTRO}-gazebo-ros ros-${ROS_DISTRO}-gazebo-ros-control"; fi) \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    libceres-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Stage 5: Visualization (AMD64 only - too heavy for ARM64 emulation)
+RUN if [ "${TARGETARCH}" = "amd64" ]; then \
+        apt-get update && apt-get install -y --no-install-recommends \
+        ros-${ROS_DISTRO}-rviz \
+        ros-${ROS_DISTRO}-joint-state-publisher-gui \
+        ros-${ROS_DISTRO}-gazebo-ros ros-${ROS_DISTRO}-gazebo-ros-control \
+        ros-${ROS_DISTRO}-robot-localization \
+        ros-${ROS_DISTRO}-interactive-marker-twist-server \
+        ros-${ROS_DISTRO}-vision-opencv \
+        && apt-get clean && rm -rf /var/lib/apt/lists/*; \
+    else \
+        echo "Skipping heavy visualization packages for ARM64"; \
+    fi
 
 # ========== Setup ROS Workspace ==========
 RUN rosdep init || true && rosdep update
 RUN mkdir -p ${CATKIN_WS}/src
 COPY . ${CATKIN_WS}/src/Mars-Rover
 
-# Removed problematic packages that don't build on ARM64
+# Remove problematic packages that don't build on ARM64
 RUN if [ "${TARGETARCH}" = "arm64" ]; then \
         cd ${CATKIN_WS}/src/Mars-Rover && \
         rm -rf viso2 VINS-Mono libviso2 || true; \
@@ -79,7 +96,7 @@ RUN cd ${CATKIN_WS} && \
     rosdep install --from-paths src --ignore-src -r -y || true && \
     echo '=== Building workspace for ${TARGETARCH} ===' && \
     if [ '${TARGETARCH}' = 'arm64' ]; then \
-        catkin build -j2 --no-status; \
+        catkin build -j2 --no-status --continue-on-failure || catkin build -j1 --no-status; \
     else \
         catkin build -j\$(nproc) --no-status; \
     fi && \
