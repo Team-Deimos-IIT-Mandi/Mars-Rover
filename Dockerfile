@@ -1,5 +1,13 @@
 # ========== Multi-Architecture Build for AMD64 and ARM64 (Jetson Nano) ==========
-FROM osrf/ros:noetic-desktop-full
+# Use architecture-specific base images that actually exist
+ARG TARGETARCH
+
+# Define base images for each architecture
+FROM --platform=linux/arm64 arm64v8/ros:noetic AS base-arm64
+FROM --platform=linux/amd64 osrf/ros:noetic-desktop-full AS base-amd64
+
+# Select the correct base based on target architecture
+FROM base-${TARGETARCH} AS final
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
@@ -26,7 +34,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Core ROS packages
     ros-${ROS_DISTRO}-rosbridge-suite \
     ros-${ROS_DISTRO}-tf ros-${ROS_DISTRO}-tf2 ros-${ROS_DISTRO}-message-filters \
-    ros-${ROS_DISTRO}-gazebo-ros ros-${ROS_DISTRO}-gazebo-ros-control \
     ros-${ROS_DISTRO}-joint-state-publisher-gui ros-${ROS_DISTRO}-robot-state-publisher \
     ros-${ROS_DISTRO}-teleop-twist-keyboard ros-${ROS_DISTRO}-teleop-twist-joy \
     ros-${ROS_DISTRO}-cv-bridge ros-${ROS_DISTRO}-image-transport \
@@ -41,19 +48,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # OpenCV and math libs
     libopencv-dev python3-opencv libatlas-base-dev libeigen3-dev \
     libgoogle-glog-dev libsuitesparse-dev libboost-all-dev \
-    # Use system Ceres instead of building from source
     libceres-dev \
+    # Conditionally install Gazebo only for AMD64 (skip for Jetson)
+    $(if [ "$TARGETARCH" = "amd64" ]; then echo "ros-${ROS_DISTRO}-gazebo-ros ros-${ROS_DISTRO}-gazebo-ros-control"; fi) \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # ========== Setup ROS Workspace ==========
 RUN rosdep init || true && rosdep update
-
 RUN mkdir -p ${CATKIN_WS}/src
-
 COPY . ${CATKIN_WS}/src/Mars-Rover
 
-# ========== Build Catkin Workspace (No Architecture-Specific Flags for Cross-Compilation) ==========
+# ========== Build Catkin Workspace (Architecture-Optimized) ==========
 RUN cd ${CATKIN_WS} && \
     /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
     catkin init && \
@@ -62,20 +68,27 @@ RUN cd ${CATKIN_WS} && \
     echo '=== Installing rosdep dependencies ===' && \
     rosdep install --from-paths src --ignore-src -r -y || true && \
     echo '=== Building workspace for ${TARGETARCH} ===' && \
-    catkin build -j\$(nproc) --mem-limit 80% && \
+    if [ '$TARGETARCH' = 'arm64' ]; then \
+        catkin build -j2 --mem-limit 70%; \
+    else \
+        catkin build -j\$(nproc) --mem-limit 80%; \
+    fi && \
     echo '=== Cleaning up build artifacts ===' && \
     rm -rf build logs .catkin_tools"
 
 # ========== Environment Setup ==========
-RUN mkdir -p /root/.ros/log /root/.gazebo
+RUN mkdir -p /root/.ros/log && \
+    if [ "$TARGETARCH" != "arm64" ]; then mkdir -p /root/.gazebo; fi
 
-# Setup environment variables (with ARM optimizations for runtime, not compile time)
+# Setup environment variables with architecture-specific optimizations
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc && \
     echo "source ${CATKIN_WS}/devel/setup.bash" >> /root/.bashrc && \
     echo "export ROS_MASTER_URI=http://localhost:11311" >> /root/.bashrc && \
     echo "export ROS_HOSTNAME=localhost" >> /root/.bashrc && \
     echo "export ROS_IP=127.0.0.1" >> /root/.bashrc && \
-    echo "export GAZEBO_MODEL_PATH=${CATKIN_WS}/src/Mars-Rover/rover_description/models:/usr/share/gazebo-11/models" >> /root/.bashrc && \
+    if [ "$TARGETARCH" = "amd64" ]; then \
+        echo "export GAZEBO_MODEL_PATH=${CATKIN_WS}/src/Mars-Rover/rover_description/models:/usr/share/gazebo-11/models" >> /root/.bashrc; \
+    fi && \
     if [ "$TARGETARCH" = "arm64" ]; then \
         echo "# Jetson Nano ARM64 runtime optimizations" >> /root/.bashrc && \
         echo "export OPENBLAS_CORETYPE=ARMV8" >> /root/.bashrc && \
@@ -91,11 +104,20 @@ set -e\n\
 source /opt/ros/${ROS_DISTRO}/setup.bash\n\
 source ${CATKIN_WS}/devel/setup.bash\n\
 \n\
+# Detect architecture\n\
+ARCH=$(uname -m)\n\
+if [ "$ARCH" = "aarch64" ]; then\n\
+  PLATFORM="Jetson Nano (ARM64)"\n\
+else\n\
+  PLATFORM="x86_64 (AMD64)"\n\
+fi\n\
+\n\
 # Display system information\n\
 echo "================================="\n\
 echo "🚀 Mars Rover Control System"\n\
 echo "================================="\n\
-echo "Architecture: $(uname -m)"\n\
+echo "Platform: $PLATFORM"\n\
+echo "Architecture: $ARCH"\n\
 echo "ROS Distribution: ${ROS_DISTRO}"\n\
 echo "Workspace: ${CATKIN_WS}"\n\
 echo "================================="\n\
@@ -107,7 +129,9 @@ if [ "$MODE" = "dev" ]; then\n\
   echo ""\n\
   echo "Quick commands:"\n\
   echo "  roslaunch rover_description display.launch    # Visualize in RViz"\n\
-  echo "  roslaunch rover_gazebo rover_world.launch     # Launch Gazebo simulation"\n\
+  if [ "$ARCH" != "aarch64" ]; then\n\
+    echo "  roslaunch rover_gazebo rover_world.launch     # Launch Gazebo simulation"\n\
+  fi\n\
   echo "  rostopic list                                 # List available topics"\n\
   echo ""\n\
   exec bash\n\
@@ -152,8 +176,6 @@ else\n\
 fi\n' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 EXPOSE 9090 11311
-
 WORKDIR ${CATKIN_WS}
-
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["dev"]

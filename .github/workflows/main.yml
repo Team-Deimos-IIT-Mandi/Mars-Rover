@@ -51,15 +51,27 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/amd64 \
+            --build-arg TARGETARCH=amd64 \
             --load \
             -t ${{ env.DOCKER_IMAGE }}:test-amd64 \
             --progress=plain \
             .
 
-      - name: "Test ROS environment and packages"
+      - name: "Build Docker image for ARM64 (testing)"
+        timeout-minutes: 90
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            --build-arg TARGETARCH=arm64 \
+            --load \
+            -t ${{ env.DOCKER_IMAGE }}:test-arm64 \
+            --progress=plain \
+            .
+
+      - name: "Test ROS environment and packages (AMD64)"
         timeout-minutes: 5
         run: |
-          echo "=== Testing ROS environment ==="
+          echo "=== Testing ROS environment (AMD64) ==="
           docker run --rm --entrypoint bash ${{ env.DOCKER_IMAGE }}:test-amd64 -c '
             set -e
             source /opt/ros/$ROS_DISTRO/setup.bash
@@ -68,54 +80,34 @@ jobs:
             echo "✅ ROS_DISTRO: $ROS_DISTRO"
             echo "✅ ROS_ROOT: $ROS_ROOT"
             echo "✅ ROS_PACKAGE_PATH: $ROS_PACKAGE_PATH"
+            echo "✅ Architecture: $(uname -m)"
             
             echo ""
             echo "=== Checking Mars Rover packages ==="
             
-            # Check if packages exist (no roscore needed)
-            if [ -d "/root/catkin_ws/src/Mars-Rover/rover_description" ]; then
-              echo "✅ rover_description found"
-            else
-              echo "❌ rover_description NOT found"
-              exit 1
-            fi
-            
-            if [ -d "/root/catkin_ws/src/Mars-Rover/rover_control" ]; then
-              echo "✅ rover_control found"
-            else
-              echo "❌ rover_control NOT found"
-              exit 1
-            fi
-            
-            if [ -d "/root/catkin_ws/src/Mars-Rover/rover_navigation" ]; then
-              echo "✅ rover_navigation found"
-            else
-              echo "❌ rover_navigation NOT found"
-              exit 1
-            fi
+            # Check if packages exist
+            for pkg in rover_description rover_control rover_navigation; do
+              if [ -d "/root/catkin_ws/src/Mars-Rover/$pkg" ]; then
+                echo "✅ $pkg found"
+              else
+                echo "❌ $pkg NOT found"
+                exit 1
+              fi
+            done
             
             echo ""
             echo "=== Catkin workspace info ==="
             echo "Workspace: $(pwd)"
             
             # Check build artifacts
-            if [ -d "/root/catkin_ws/devel" ]; then
-              echo "✅ Workspace built (devel/ exists)"
-              ls -la /root/catkin_ws/devel/ | head -10
+            if [ -d "/root/catkin_ws/devel" ] && [ -f "/root/catkin_ws/devel/setup.bash" ]; then
+              echo "✅ Workspace built successfully"
             else
               echo "❌ Workspace NOT built"
               exit 1
             fi
             
-            # Check if setup.bash exists
-            if [ -f "/root/catkin_ws/devel/setup.bash" ]; then
-              echo "✅ setup.bash exists"
-            else
-              echo "❌ setup.bash NOT found"
-              exit 1
-            fi
-            
-            # List packages without roscore
+            # List packages
             echo ""
             echo "=== Package structure ==="
             find /root/catkin_ws/src/Mars-Rover -name "package.xml" -exec dirname {} \; | while read pkg; do
@@ -141,16 +133,98 @@ jobs:
               echo "Mesh files: $(find /root/catkin_ws/src/Mars-Rover/rover_description/meshes -name "*.STL" | wc -l)"
             fi
             
+            # Test Gazebo availability (AMD64 only)
             echo ""
-            echo "✅ All ROS environment tests passed!"
+            echo "=== Checking Gazebo ==="
+            if command -v gazebo &> /dev/null; then
+              echo "✅ Gazebo is available"
+            else
+              echo "⚠️ Gazebo not found (expected for ARM64)"
+            fi
+            
+            echo ""
+            echo "✅ All AMD64 tests passed!"
           '
+
+      - name: "Test ROS environment and packages (ARM64)"
+        timeout-minutes: 5
+        run: |
+          echo "=== Testing ROS environment (ARM64) ==="
+          docker run --rm --entrypoint bash ${{ env.DOCKER_IMAGE }}:test-arm64 -c '
+            set -e
+            source /opt/ros/$ROS_DISTRO/setup.bash
+            source /root/catkin_ws/devel/setup.bash
+            
+            echo "✅ ROS_DISTRO: $ROS_DISTRO"
+            echo "✅ ROS_ROOT: $ROS_ROOT"
+            echo "✅ ROS_PACKAGE_PATH: $ROS_PACKAGE_PATH"
+            echo "✅ Architecture: $(uname -m)"
+            
+            echo ""
+            echo "=== Checking Mars Rover packages ==="
+            
+            # Check if packages exist
+            for pkg in rover_description rover_control rover_navigation; do
+              if [ -d "/root/catkin_ws/src/Mars-Rover/$pkg" ]; then
+                echo "✅ $pkg found"
+              else
+                echo "❌ $pkg NOT found"
+                exit 1
+              fi
+            done
+            
+            echo ""
+            echo "=== Catkin workspace info ==="
+            
+            # Check build artifacts
+            if [ -d "/root/catkin_ws/devel" ] && [ -f "/root/catkin_ws/devel/setup.bash" ]; then
+              echo "✅ Workspace built successfully"
+            else
+              echo "❌ Workspace NOT built"
+              exit 1
+            fi
+            
+            # Check ARM64 optimizations
+            echo ""
+            echo "=== Checking ARM64 optimizations ==="
+            if grep -q "OPENBLAS_CORETYPE=ARMV8" /root/.bashrc; then
+              echo "✅ ARM64 optimizations configured"
+            else
+              echo "⚠️ ARM64 optimizations not found"
+            fi
+            
+            echo ""
+            echo "✅ All ARM64 tests passed!"
+          '
+
+      - name: "Test entrypoint script consistency"
+        timeout-minutes: 5
+        run: |
+          echo "=== Testing entrypoint script (AMD64) ==="
+          docker run --rm ${{ env.DOCKER_IMAGE }}:test-amd64 dev <<'EOF'
+            echo "Entrypoint test for AMD64"
+            exit 0
+          EOF
+          
+          echo ""
+          echo "=== Testing entrypoint script (ARM64) ==="
+          docker run --rm ${{ env.DOCKER_IMAGE }}:test-arm64 dev <<'EOF'
+            echo "Entrypoint test for ARM64"
+            exit 0
+          EOF
+          
+          echo ""
+          echo "✅ Entrypoint scripts working on both architectures!"
 
       - name: "Display build summary"
         run: |
           echo "=== Build and Test Summary ==="
           echo "✅ All tests passed successfully!"
-          echo "Image: ${{ env.DOCKER_IMAGE }}:test-amd64"
-          echo "Platform: linux/amd64"
+          echo ""
+          echo "Images built:"
+          echo "  - AMD64: ${{ env.DOCKER_IMAGE }}:test-amd64"
+          echo "  - ARM64: ${{ env.DOCKER_IMAGE }}:test-arm64"
+          echo ""
           docker images | grep mars_rover
 
   push-to-registry:
@@ -208,6 +282,8 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=jetson-nano,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=amd64,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=arm64,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=dev-latest,enable=${{ github.ref == 'refs/heads/anish-part' }}
             type=sha,prefix={{branch}}-
 
@@ -245,29 +321,51 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "**For Jetson Nano (ARM64):**" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "# Using multi-arch tag (auto-selects ARM64)" >> $GITHUB_STEP_SUMMARY
             echo "docker pull ${{ env.DOCKER_IMAGE }}:jetson-nano" >> $GITHUB_STEP_SUMMARY
             echo "docker run -it --runtime nvidia --privileged --network host \\" >> $GITHUB_STEP_SUMMARY
             echo "  ${{ env.DOCKER_IMAGE }}:jetson-nano" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "# Or explicitly pull ARM64" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull --platform linux/arm64 ${{ env.DOCKER_IMAGE }}:arm64" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**For x86_64:**" >> $GITHUB_STEP_SUMMARY
+            echo "**For x86_64 (AMD64):**" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "# Using multi-arch tag (auto-selects AMD64)" >> $GITHUB_STEP_SUMMARY
             echo "docker pull ${{ env.DOCKER_IMAGE }}:latest" >> $GITHUB_STEP_SUMMARY
             echo "docker run -it --privileged --network host \\" >> $GITHUB_STEP_SUMMARY
+            echo "  -e DISPLAY=\$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix \\" >> $GITHUB_STEP_SUMMARY
             echo "  ${{ env.DOCKER_IMAGE }}:latest" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "# Or explicitly pull AMD64" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull --platform linux/amd64 ${{ env.DOCKER_IMAGE }}:amd64" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           elif [[ "${{ github.ref }}" == "refs/heads/anish-part" ]]; then
             echo "**Development Build (anish-part branch):**" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "# Multi-arch (auto-selects based on your platform)" >> $GITHUB_STEP_SUMMARY
             echo "docker pull ${{ env.DOCKER_IMAGE }}:dev-latest" >> $GITHUB_STEP_SUMMARY
-            echo "docker pull ${{ env.DOCKER_IMAGE }}:anish-part" >> $GITHUB_STEP_SUMMARY
             echo "docker run -it --privileged --network host \\" >> $GITHUB_STEP_SUMMARY
             echo "  ${{ env.DOCKER_IMAGE }}:dev-latest" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "# Branch-specific tag" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull ${{ env.DOCKER_IMAGE }}:anish-part" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "⚠️ **Note:** This is a development build from the anish-part branch." >> $GITHUB_STEP_SUMMARY
           fi
           
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 Entrypoint Modes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Development shell (default)" >> $GITHUB_STEP_SUMMARY
+          echo "docker run -it IMAGE_NAME dev" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# ROS Core + ROSBridge" >> $GITHUB_STEP_SUMMARY
+          echo "docker run -it IMAGE_NAME roscore" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ Build completed successfully!" >> $GITHUB_STEP_SUMMARY
 
@@ -275,13 +373,26 @@ jobs:
         run: |
           echo "=== Verifying pushed images ==="
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Inspecting latest tag:"
             docker buildx imagetools inspect ${{ env.DOCKER_IMAGE }}:latest
+            echo ""
+            echo "Inspecting jetson-nano tag:"
+            docker buildx imagetools inspect ${{ env.DOCKER_IMAGE }}:jetson-nano
           elif [[ "${{ github.ref }}" == "refs/heads/anish-part" ]]; then
+            echo "Inspecting dev-latest tag:"
             docker buildx imagetools inspect ${{ env.DOCKER_IMAGE }}:dev-latest
           fi
+          
           echo ""
-          echo "=== All tags for this build ==="
+          echo "=== Checking all architectures for each tag ==="
           echo "${{ steps.meta.outputs.tags }}" | while read tag; do
-            echo "Inspecting: $tag"
-            docker buildx imagetools inspect "$tag" --raw | jq -r '.manifests[].platform | "\(.os)/\(.architecture)"' || true
+            if [ -n "$tag" ]; then
+              echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+              echo "Tag: $tag"
+              echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+              docker buildx imagetools inspect "$tag" --raw | jq -r '.manifests[]? | "  ✅ \(.platform.os)/\(.platform.architecture)"' 2>/dev/null || echo "  ⚠️  Single arch or inspection failed"
+            fi
           done
+          
+          echo ""
+          echo "✅ All images verified successfully!"
