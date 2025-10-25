@@ -63,6 +63,12 @@ RUN rosdep init || true && rosdep update
 RUN mkdir -p ${CATKIN_WS}/src
 COPY . ${CATKIN_WS}/src/Mars-Rover
 
+# Removed problematic packages that don't build on ARM64
+RUN if [ "${TARGETARCH}" = "arm64" ]; then \
+        cd ${CATKIN_WS}/src/Mars-Rover && \
+        rm -rf viso2 VINS-Mono libviso2 || true; \
+    fi
+
 # ========== Build Catkin Workspace (Architecture-Optimized) ==========
 RUN cd ${CATKIN_WS} && \
     /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
