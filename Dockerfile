@@ -29,7 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Build tools
     build-essential cmake git wget curl gnupg2 lsb-release software-properties-common \
     # Python / ROS tools
-    python3-pip python3-dev python3-catkin-tools python3-rosdep \
+    python3-pip python3-dev python3-catkin-tools python3-rosdep python3-psutil \
     python3-rosinstall python3-rosinstall-generator python3-wstool \
     # Core ROS packages
     ros-${ROS_DISTRO}-rosbridge-suite \
@@ -43,12 +43,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-robot-localization \
     ros-${ROS_DISTRO}-interactive-marker-twist-server \
     ros-${ROS_DISTRO}-twist-mux \
+    ros-${ROS_DISTRO}-controller-manager \
+    ros-${ROS_DISTRO}-realtime-tools \
+    ros-${ROS_DISTRO}-smach ros-${ROS_DISTRO}-smach-ros \
+    ros-${ROS_DISTRO}-spatio-temporal-voxel-layer \
     # System tools
     nano vim htop net-tools iputils-ping ca-certificates \
     # OpenCV and math libs
     libopencv-dev python3-opencv libatlas-base-dev libeigen3-dev \
     libgoogle-glog-dev libsuitesparse-dev libboost-all-dev \
-    libceres-dev \
+    libceres-dev libpcl-dev pcl-tools \
     # Conditionally install Gazebo only for AMD64 (skip for Jetson)
     $(if [ "$TARGETARCH" = "amd64" ]; then echo "ros-${ROS_DISTRO}-gazebo-ros ros-${ROS_DISTRO}-gazebo-ros-control"; fi) \
     && apt-get clean \
@@ -68,10 +72,10 @@ RUN cd ${CATKIN_WS} && \
     echo '=== Installing rosdep dependencies ===' && \
     rosdep install --from-paths src --ignore-src -r -y || true && \
     echo '=== Building workspace for ${TARGETARCH} ===' && \
-    if [ '$TARGETARCH' = 'arm64' ]; then \
-        catkin build -j2 --mem-limit 70%; \
+    if [ '${TARGETARCH}' = 'arm64' ]; then \
+        catkin build -j2 --no-status; \
     else \
-        catkin build -j\$(nproc) --mem-limit 80%; \
+        catkin build -j\$(nproc) --no-status; \
     fi && \
     echo '=== Cleaning up build artifacts ===' && \
     rm -rf build logs .catkin_tools"
